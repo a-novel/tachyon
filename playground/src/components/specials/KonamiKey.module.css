@@ -1,0 +1,25 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 10rem;
+    text-align: center;
+}
+
+.wrapper > * {
+    width: 100%;
+}
+
+.feedback {
+    height: 10rem;
+}
+
+.title {
+    font-size: 1rem;
+    color: #FFFFFF;
+}
+
+.subTitle {
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #454545;
+}

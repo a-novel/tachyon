@@ -1,0 +1,45 @@
+.wrapper {
+    width: 100%;
+    flex-grow: 1;
+    overflow: auto;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    width: 50rem;
+    max-width: 100%;
+    margin: auto;
+    flex-wrap: nowrap;
+    border-style: solid;
+    border-width: thin;
+    border-color: #212121;
+}
+
+.title {
+    background-color: #212121;
+    padding: 1rem;
+    color: #FF9300;
+    font-size: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.about {
+    color: #FFFFFF;
+    font-weight: 300;
+}
+
+.licenseText {
+    font-size: 1rem;
+    line-height: 1.6rem;
+    color: #acacac;
+    text-align: justify;
+    white-space: pre-line;
+    padding: 1rem;
+}

@@ -1,0 +1,88 @@
+.page {
+    background-color: #000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.header {
+    width: 100%;
+    background-color: #212121;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    z-index: 9999;
+}
+
+.header > * {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.headerTitle {
+    padding: 1rem;
+    cursor: pointer;
+    color: #FFFFFF;
+    font-size: 2rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.headerTitleIcon {
+    margin: 0 0.6rem 0 0;
+}
+
+.headerLicense {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border-style: solid;
+    border-width: 0 0 0 thin;
+    border-color: #151515;
+    transition: linear 0s;
+    height: 100%;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+}
+
+.headerLicense:hover, .headerLicenseActive {
+    background-color: #1a1a1a;
+    box-shadow: 0 0 0.8rem #101010 inset;
+}
+
+.headerLicenceMain {
+    font-size: 1.5rem;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.headerLicenceSub {
+    text-align: center;
+    color: #acacac;
+    font-size: 0.8rem;
+}
+
+.pageTitle {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    font-size: 2rem;
+}
+
+.pageTitleText {
+    font-weight: 300;
+    color: #acacac;
+}
+
+.pageTitleIcon {
+    color: #FF9300;
+    margin: auto 0.6rem auto 0;
+}

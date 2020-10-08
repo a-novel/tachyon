@@ -233,6 +233,13 @@ class sequencer {
 	};
 
 	/**
+	 * Return current sequence of pressed keys.
+	 *
+	 * @return {Sequence[]}
+	 */
+	getSequence = () => this.#sequences;
+
+	/**
 	 * Add a new listener for a particular sequences. This listener is static and cannot be removed afterwards.
 	 *
 	 * @param {function} fn

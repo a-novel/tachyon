@@ -1,0 +1,8 @@
+.gameArea {
+    margin: 1rem auto;
+    display: flex;
+    flex-direction: column;
+    border-style: solid;
+    border-width: thin;
+    border-color: #212121;
+}
