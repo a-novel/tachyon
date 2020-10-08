@@ -32,7 +32,7 @@ class KonamiKey extends React.Component {
 			this.timer = setTimeout(() => this.setState({pressing: false}), 50);
 		});
 
-		this.props.checkCombo(this.sequencer.);
+		this.props.checkCombo(this.sequencer.getSequence());
 	};
 
 	componentDidMount() {

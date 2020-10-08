@@ -82,7 +82,7 @@ class sequencer {
 	/**
 	 * Hold the current sequences of pressed keys.
 	 *
-	 * @type {Sequence[]}
+	 * @type {string[]}
 	 * @private
 	 */
 	#sequences = [];
@@ -235,9 +235,24 @@ class sequencer {
 	/**
 	 * Return current sequence of pressed keys.
 	 *
-	 * @return {Sequence[]}
+	 * @return {string[]}
 	 */
 	getSequence = () => this.#sequences;
+
+	/**
+	 * Return the number of validated keys within the sequence.
+	 *
+	 * @param {string[]} keys
+	 * @return number
+	 */
+	getValidationPercentage = keys => {
+		let i = keys.length;
+		while (keys.slice(0, i).join(';') !== this.#sequences.slice(-i).join(';') && i > 0) {
+			i--;
+		}
+
+		return i;
+	};
 
 	/**
 	 * Add a new listener for a particular sequences. This listener is static and cannot be removed afterwards.
