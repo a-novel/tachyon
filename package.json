@@ -1,18 +1,9 @@
 {
   "name": "@anovel/tachyon",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": false,
-  "dependencies": {
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.3",
-    "rollup": "^2.29.0"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "rm -rf ./dist && rollup -c",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "rm -rf ./dist && rollup -c"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -40,7 +31,8 @@
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup": "^2.29.0"
   },
   "repository": {
     "type": "git",
