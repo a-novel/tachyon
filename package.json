@@ -3,7 +3,7 @@
   "version": "0.5.4",
   "private": false,
   "scripts": {
-    "build": "rm -rf ./dist && rollup -c"
+    "build": "rm -rf ./lib && rollup -c"
   },
   "eslintConfig": {
     "extends": "react-app"
