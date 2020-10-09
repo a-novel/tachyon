@@ -17,6 +17,7 @@ A light framework for easier and advanced DOM manipulations.
 - [Selection](#selection)
     - [getRange](#getrange)
     - [setRange](#setrange)
+    - [Range ignore](#range-ignore)
 
 ## Keys
 
@@ -244,7 +245,7 @@ to default DOM handlers, are:
 - doesn't crash if off limits (will just stop if their is no more characters to select)
 - is compatible with element children DOM hierarchy (you don't have to select a direct textNode)
 
-### range ignore
+### Range ignore
 
 Both setRange and getRange take an optional array of string DOM selectors. This
 array tells our handlers to ignore some elements when computing selection.
