@@ -50,11 +50,10 @@ const event = id => `KeySequenceUpdated_${id}`;
 /**
  * Extend eventListener concept on a serie of keys.
  *
- * @typedef {sequencer} Sequencer
  * @version 1.0.0
  * @author [Kushuh](https://github.com/Kushuh)
  */
-class sequencer {
+class Sequencer {
 	/**
 	 * @param {number=} timeout
 	 * @param {boolean=} debug
@@ -301,4 +300,4 @@ class sequencer {
 	};
 }
 
-export {sequencer, COMBOS};
+export {Sequencer, COMBOS};

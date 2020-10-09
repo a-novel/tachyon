@@ -32,7 +32,7 @@ import css from './MyComponent.module.css';
 class MyComponent extends React.Component {
   state = {combo: false};
 
-  sequencer = new keys.sequencer();
+  sequencer = new keys.Sequencer();
 
   ref = React.createRef();
 
@@ -59,7 +59,7 @@ A sequencer is a custom class that will record a serie of pressed keys within th
 element it listens to. I can take 2 optional parameters.
 
 ```javascript
-const sequencer = new keys.sequencer(400, false);
+const sequencer = new keys.Sequencer(400, false);
 ```
 
 | Parameter | Type | Description |
