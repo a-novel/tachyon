@@ -2,8 +2,9 @@
 # yarn lockfile v1
 
 
-"@anovel/tachyon@../":
-  version "0.1.2"
+"@anovel/tachyon@file:../anovel-tachyon-v0.4.4.tgz":
+  version "0.4.4"
+  resolved "file:../anovel-tachyon-v0.4.4.tgz#e0b29d63f0de165a317c11d7217261c4784ca252"
   dependencies:
     react "^16.13.1"
     react-dom "^16.13.1"
