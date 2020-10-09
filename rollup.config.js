@@ -13,15 +13,11 @@ export default [
 				format: 'cjs'
 			}
 		],
-		external: [
-			...Object.keys(pkg.dependencies || {})
-		],
+		external: [...Object.keys(pkg.dependencies || {})],
 		plugins: [
 			commonjs(),
 			resolve(),
-			babel({
-				exclude: 'node_modules/**'
-			})
+			babel({exclude: 'node_modules/**'})
 		]
 	}
 ];
