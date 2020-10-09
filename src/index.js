@@ -1,5 +1,13 @@
-import * as keys from './keys';
-import * as os from './os';
-import * as selection from './selection';
+import Sequencer, {COMBOS} from './keys';
+import {getOS, OS} from './os';
+import {getRange, setRange} from './selection';
 
-export {keys, os, selection};
+const literals = {OS, COMBOS};
+
+export {
+	Sequencer,
+	literals,
+	getOS,
+	getRange,
+	setRange
+};

@@ -310,4 +310,5 @@ class Sequencer {
 	};
 }
 
-export {Sequencer, COMBOS};
+export default Sequencer;
+export {COMBOS};

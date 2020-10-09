@@ -26,13 +26,13 @@ An advanced eventListener to easily watch for complex key combos.
 A simple use case is given below.
 ```jsx
 import React from 'react';
-import {keys} from '@anovel/tachyon';
+import {Sequencer} from '@anovel/tachyon';
 import css from './MyComponent.module.css';
 
 class MyComponent extends React.Component {
   state = {combo: false};
 
-  sequencer = new keys.Sequencer();
+  sequencer = new Sequencer();
 
   ref = React.createRef();
 
@@ -59,7 +59,7 @@ A sequencer is a custom class that will record a serie of pressed keys within th
 element it listens to. I can take 2 optional parameters.
 
 ```javascript
-const sequencer = new keys.Sequencer(400, false);
+const sequencer = new Sequencer(400, false);
 ```
 
 | Parameter | Type | Description |
@@ -142,22 +142,22 @@ them via `keys.COMBOS`.
 Return information about the client OS.
 
 ```javascript
-import {os} from '@anovel/tachyon';
+import {getOS, literals} from '@anovel/tachyon';
 
-const currentOS = os.getOS();
+const currentOS = getOS();
 
 switch(currentOS) {
-case os.OS.WINDOWS:
+case literals.OS.WINDOWS:
 
-case os.OS.MACOS:
+case literals.OS.MACOS:
 
-case os.OS.LINUX:
+case literals.OS.LINUX:
 
-case os.OS.ANDROID:
+case literals.OS.ANDROID:
 
-case os.OS.IOS:
+case literals.OS.IOS:
 
-case os.OS.OTHER:
+case literals.OS.OTHER:
 
 }
 ```
@@ -169,9 +169,9 @@ Tools to easily select text inside complex div structures.
 ### getRange
 
 ```javascript
-import {selection} from '@anovel/tachyon';
+import {getRange} from '@anovel/tachyon';
 
-const currentSelection = selection.getRange(element);
+const currentSelection = getRange(element);
 ```
 
 Returns the current caret range within a given element. The returned
@@ -234,9 +234,9 @@ of the caret bounds, as they appear to human eyes.
 ### setRange
 
 ```javascript
-import {selection} from '@anovel/tachyon';
+import {setRange} from '@anovel/tachyon';
 
-const currentSelection = selection.setRange(element, 6, 21);
+const currentSelection = setRange(element, 6, 21);
 ```
 
 Set selection range within an element. The advantages of this method, compared
@@ -253,7 +253,7 @@ array tells our handlers to ignore some elements when computing selection.
 For example, applying:
 
 ```javascript
-selection.setRange(element, 6, 21, ['span']);
+setRange(element, 6, 21, ['span']);
 ```
 
 to:
