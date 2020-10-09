@@ -2,13 +2,14 @@
 # yarn lockfile v1
 
 
-"@anovel/tachyon@file:../anovel-tachyon-v0.4.4.tgz":
-  version "0.4.4"
-  resolved "file:../anovel-tachyon-v0.4.4.tgz#e0b29d63f0de165a317c11d7217261c4784ca252"
+"@anovel/tachyon@file:../anovel-tachyon-v0.4.5.tgz":
+  version "0.4.5"
+  resolved "file:../anovel-tachyon-v0.4.5.tgz#725e4dbd76b40fbc243064f66a8afc373747329e"
   dependencies:
     react "^16.13.1"
     react-dom "^16.13.1"
     react-scripts "3.4.3"
+    rollup "^2.29.0"
 
 "@babel/code-frame@7.8.3", "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.8.3":
   version "7.8.3"
@@ -9151,6 +9152,13 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
   dependencies:
     hash-base "^3.0.0"
     inherits "^2.0.1"
+
+rollup@^2.29.0:
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.29.0.tgz#0c5c5968530b21ca0e32f8b94b7cd9346cfb0eec"
+  integrity sha512-gtU0sjxMpsVlpuAf4QXienPmUAhd6Kc7owQ4f5lypoxBW18fw2UNYZ4NssLGsri6WhUZkE/Ts3EMRebN+gNLiQ==
+  optionalDependencies:
+    fsevents "~2.1.2"
 
 rsvp@^4.8.4:
   version "4.8.5"
