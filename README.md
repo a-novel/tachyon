@@ -16,6 +16,7 @@ A light framework for easier and advanced DOM manipulations.
 - [os](#os)
 - [Selection](#selection)
     - [getRange](#getrange)
+    - [setRange](#setrange)
 
 ## Keys
 
@@ -242,6 +243,32 @@ to default DOM handlers, are:
 - easier declaration
 - doesn't crash if off limits (will just stop if their is no more characters to select)
 - is compatible with element children DOM hierarchy (you don't have to select a direct textNode)
+
+### range ignore
+
+Both setRange and getRange take an optional array of string DOM selectors. This
+array tells our handlers to ignore some elements when computing selection.
+
+For example, applying:
+
+```javascript
+selection.setRange(element, 6, 21, ['span']);
+```
+
+to:
+
+```html
+<div>Lorem ipsum dolor <span>sit amet</span>, consectetur adipiscing elit.</div>
+```
+
+will select:
+
+```html
+ipsum dolor <span>sit amet</span>, c
+```
+
+since it will not count what is between spans (although it will select it since
+selection cannot be cut half).
 
 # License
 
