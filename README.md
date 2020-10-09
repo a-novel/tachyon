@@ -5,6 +5,16 @@ A light framework for easier and advanced DOM manipulations.
 > The following functions require a client DOM environment to run. They are meant
 > to work within client frameworks such as React.
 
+- [Keys](#keys)
+    - [Sequencer Initialization](#sequencer-initialization)
+    - [Register sequences](#register-sequences)
+    - [Special methods](#special-methods)
+        - [getSequence](#getsequence)
+        - [getValidationStatus](#getvalidationstatus)
+        - [setDebugMode](#setdebugmode)
+    - [Default key combos](#default-key-combos)
+- [os](#os)
+
 ## Keys
 
 An advanced eventListener to easily watch for complex key combos.
@@ -73,7 +83,7 @@ sequencer.register(sequence, callback, fallback);
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-| sequence | string[] | The sequence of key to trigger the callback. |
+| sequence | string[] | The sequence of key to trigger the callback. Keys are referring to the event attribute `e.key`. |
 | callback | function: InputEvent | The callback to execute when sequence is validated. |
 | fallback | function: InputEvent | An optional function to run each time a key is pressed but the combo is not validated. |
 
@@ -108,6 +118,46 @@ Set debug mode to true or false dynamically.
 sequencer.setDebugMode(true);
 ```
 
+### Default key combos
+
+Keys provides some default keys sequences to use within your listeners. You can use
+them via `keys.COMBOS`.
+
+| Combo Name | Keys |
+| :--- | :--- |
+| UNDO | Ctrl+z (Cmd+z for macOS) |
+| REDO | Ctrl+Alt+z (Cmd+Alt+z for macOS) |
+| SELECTALL | Ctrl+a (Cmd+a for macOS) |
+| COPY | Ctrl+c (Cmd+c for macOS) |
+| CUT | Ctrl+x (Cmd+x for macOS) |
+| PASTE | Ctrl+v (Cmd+v for macOS) |
+| KONAMI_CODE | up up down down left right left right b a |
+
+## os
+
+Return information about the client OS.
+
+```javascript
+import {os} from '@anovel/tachyon';
+
+const currentOS = os.getOS();
+
+switch(currentOS) {
+case os.OS.WINDOWS:
+
+case os.OS.MACOS:
+
+case os.OS.LINUX:
+
+case os.OS.ANDROID:
+
+case os.OS.IOS:
+
+case os.OS.OTHER:
+
+}
+```
+
 # License
 
-Licensed under MIT for A-Novel.
+[Licensed under MIT for A-Novel](https://github.com/a-novel/tachyon/blob/master/LICENSE).

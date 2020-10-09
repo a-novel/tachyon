@@ -1,36 +1,38 @@
 // Created and maintained by Kushuh.
 // https://github.com/Kushuh - kuzanisu@gmail.com
 
-// import {getOS, OS} from '../os';
-//
-// const os = getOS();
-//
-// /**
-//  * Ctrl for most OS, Cmd for macOS.
-//  * @type {string}
-//  */
-// const actionKey = os === OS.MACOS ? 'Meta' : 'Control';
-//
-// /**
-//  * Common controls sequences.
-//  *
-//  * @type {{
-//  * 	UNDO: [string, string],
-//  * 	CUT: [string, string],
-//  * 	SELECTALL: [string, string],
-//  * 	PASTE: [string, string],
-//  * 	REDO: [string, string, string],
-//  * 	COPY: [string, string]
-//  * }}
-//  */
-// const COMBOS = {
-// 	UNDO: [actionKey, 'Z'],
-// 	REDO: [actionKey, 'Shift', 'Z'],
-// 	SELECTALL: [actionKey, 'A'],
-// 	COPY: [actionKey, 'C'],
-// 	CUT: [actionKey, 'X'],
-// 	PASTE: [actionKey, 'V']
-// };
+import {getOS, OS} from './os';
+
+const os = getOS();
+
+/**
+ * Ctrl for most OS, Cmd for macOS.
+ * @type {string}
+ */
+const actionKey = os === OS.MACOS ? 'Meta' : 'Control';
+
+/**
+ * Common controls sequences.
+ *
+ * @type {{
+ * 	UNDO: string[],
+ * 	CUT: string[],
+ * 	SELECTALL: string[],
+ * 	PASTE: string[],
+ * 	REDO: string[],
+ * 	COPY: string[],
+ * 	KONAMI_CODE: string[]
+ * }}
+ */
+const COMBOS = {
+	UNDO: [actionKey, 'Z'],
+	REDO: [actionKey, 'Shift', 'Z'],
+	SELECTALL: [actionKey, 'A'],
+	COPY: [actionKey, 'C'],
+	CUT: [actionKey, 'X'],
+	PASTE: [actionKey, 'V'],
+	KONAMI_CODE: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
+};
 
 /**
  * Attach a unique event to each instance of sequencer.
@@ -299,4 +301,4 @@ class sequencer {
 	};
 }
 
-export {sequencer};
+export {sequencer, COMBOS};
