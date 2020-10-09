@@ -25,7 +25,7 @@ import React from 'react';
 import {keys} from '@anovel/tachyon';
 import css from './MyComponent.module.css';
 
-class MyComponent {
+class MyComponent extends React.Component {
   state = {combo: false};
 
   sequencer = new keys.sequencer();
