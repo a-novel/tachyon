@@ -1,6 +1,6 @@
 {
   "name": "@anovel/tachyon",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "private": false,
   "dependencies": {
     "react": "^16.13.1",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "babel src -d dist",
+    "build": "babel src -d dist && yarn pack",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

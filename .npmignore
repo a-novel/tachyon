@@ -6,3 +6,4 @@ node_modules/
 .idea/
 src/
 .babelrc
+yarn-error.log
