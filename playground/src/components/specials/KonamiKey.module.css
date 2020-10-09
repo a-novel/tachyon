@@ -3,14 +3,26 @@
     flex-direction: column;
     width: 10rem;
     text-align: center;
+    pointer-events: all!important;
+    cursor: pointer;
+    padding: 1rem;
+}
+
+.wrapper:focus {
+    outline: none!important;
+    background-color: #212121;
 }
 
 .wrapper > * {
     width: 100%;
+    pointer-events: none;
 }
 
 .feedback {
     height: 10rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .title {
@@ -22,4 +34,31 @@
     font-style: italic;
     font-size: 0.9rem;
     color: #454545;
+}
+
+.button {
+    height: 8rem;
+    width: 8rem;
+    margin: auto;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: thin;
+    border-color: #454545;
+    background-color: #000000;
+    transition: linear 0.2s;
+}
+
+.pressed {
+    background-color: #FF9300;
+    transition: linear 0s;
+}
+
+.validated {
+    background-color: #14ff00;
+    transition: linear 0s;
+}
+
+.score {
+    font-size: 1rem;
+    color: #FFFFFF;
 }

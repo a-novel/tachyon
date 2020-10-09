@@ -59,7 +59,7 @@ class sequencer {
 	 */
 	constructor(timeout, debug) {
 		this.#debug = debug;
-		this.#timeout = timeout || 300;
+		this.#timeout = timeout || 400;
 		this.#id = new Date().getTime();
 	}
 
@@ -118,7 +118,7 @@ class sequencer {
 	 * @returns {{keyDown: function}}
 	 * @public
 	 */
-	mount(el) {
+	mount = el => {
 		// Assign element to the one passed in parameters
 		this.#el = el || document;
 
@@ -130,6 +130,9 @@ class sequencer {
 
 		// Return handlers in an object.
 		return {
+			/**
+			 * @param {KeyboardEvent} e
+			 */
 			keyDown: e => {
 				// Add a new key to current sequence and record its position.
 				this.#keyCount++;
@@ -140,6 +143,9 @@ class sequencer {
 				this.#el.dispatchEvent(new CustomEvent(event(this.#id), {detail: e}));
 
 				// Remove listener declared as a variable so it can be removed.
+				/**
+				 * @param {KeyboardEvent} ee
+				 */
 				const removeKey = ee => {
 					// Callback when the key needs to be removed from current sequence.
 					const terminateCallback = () => {
@@ -150,14 +156,11 @@ class sequencer {
 						if (offset < this.#sequences.length) {
 							// Remove current key and every key before it.
 							this.#sequences = this.#sequences.slice(this.#sequences.length - offset + 1);
-
-							// Inform other listeners we updated the sequence.
-							this.#el.dispatchEvent(new CustomEvent(event(this.#id), {detail: ee}));
 						}
 
 						// Remove attached listeners for the current key.
-						this.#el.removeEventListener('keydown', removeKey, true);
-						this.#el.removeEventListener(event(this.#id), resetCallback, true);
+						this.#el.removeEventListener('keyup', removeKey, true);
+						this.#el.removeEventListener('keydown', resetCallback, true);
 					};
 
 					// Reset timer when another key is pressed fast enough, allowing for longer combos.
@@ -167,14 +170,14 @@ class sequencer {
 					};
 
 					let timer = setTimeout(terminateCallback, this.#timeout);
-					this.#el.addEventListener(event(this.#id), resetCallback, true);
+					this.#el.addEventListener('keydown', resetCallback, true);
 				}
 
 				// Add listener in a way it can be removed afterwards.
-				this.#el.addEventListener('keydown', removeKey, true);
+				this.#el.addEventListener('keyup', removeKey, true);
 			}
 		}
-	}
+	};
 
 	/**
 	 * Automatic setup : add handlers and don't return them.
@@ -182,14 +185,14 @@ class sequencer {
 	 * @param {Node=} el
 	 * @public
 	 */
-	listen(el) {
+	listen = el => {
 		// Get handlers and set them.
 		const {keyDown} = this.mount(el);
 		this.#el.addEventListener('keydown', keyDown);
 
 		// So it can be used in ref={} declaration.
 		return el;
-	}
+	};
 
 	/**
 	 * @callback accessor
@@ -203,25 +206,18 @@ class sequencer {
 	 * @param {accessor} accessor
 	 * @public
 	 */
-	dynamicKeys(accessor) {
+	dynamicKeys = accessor => {
+		if (this.#el == null) {
+			throw new Error('sequencer is not yet initialized, you cannot attach listeners to it');
+		}
+
 		this.#el.addEventListener(
 			event(this.#id),
 			e => {
-				// Get current sequences string representation.
-				const current = this.#sequences.join(' ');
-
-				// Filter each validated sequences and trigger their callbacks.
-				(accessor() || [])
-					.filter(x => x.sequence.join(' ') === current)
-					.forEach(({fn}) => fn(e.detail));
-
-				// Run fallbacks.
-				(accessor() || [])
-					.filter(x => x.sequence.join(' ') !== current && x.fallback)
-					.forEach(({fallback}) => fallback(e.detail));
+				(accessor() || []).forEach(registration => this.#checkSequence(e.detail, registration));
 			}
 		);
-	}
+	};
 
 	/**
 	 * Set debug mode programmatically.
@@ -245,13 +241,42 @@ class sequencer {
 	 * @param {string[]} keys
 	 * @return number
 	 */
-	getValidationPercentage = keys => {
+	getValidationStatus = keys => {
 		let i = keys.length;
 		while (keys.slice(0, i).join(';') !== this.#sequences.slice(-i).join(';') && i > 0) {
 			i--;
 		}
 
 		return i;
+	};
+
+	/**
+	 * Check if the current sequence matches a combo.
+	 *
+	 * @param {string} target
+	 * @param {string} current
+	 * @return {*|boolean}
+	 */
+	#isSequenceValidated = (target, current) => current.endsWith(target);
+
+	/**
+	 * @param {KeyboardEvent} e
+	 * @param {{fn: function, sequence: string[], fallback: function}} registration
+	 */
+	#checkSequence = (e, registration) => {
+		if (this.#isSequenceValidated(registration.sequence.join(' '), this.#sequences.join(' '))) {
+			if (this.#debug) {
+				console.log(`running ${registration.fn.name}`);
+			}
+
+			registration.fn(e);
+		} else if (registration.fallback) {
+			if (this.#debug) {
+				console.log(`running ${registration.fallback.name}`);
+			}
+
+			registration.fallback(e);
+		}
 	};
 
 	/**
@@ -262,26 +287,16 @@ class sequencer {
 	 * @param {function=} fallback
 	 * @public
 	 */
-	register(fn, sequence, fallback) {
+	register = (sequence, fn, fallback) => {
+		if (this.#el == null) {
+			throw new Error('sequencer is not yet initialized, you cannot attach listeners to it');
+		}
+
 		this.#el.addEventListener(
 			event(this.#id),
-			e => {
-				if (this.#sequences.join(' ') === sequence.join(' ')) {
-					if (this.#debug) {
-						console.log(`running ${fn.name}`);
-					}
-
-					fn(e.detail);
-				} else if (fallback) {
-					if (this.#debug) {
-						console.log(`running ${fallback.name}`);
-					}
-
-					fallback(e.detail);
-				}
-			}
+			e => this.#checkSequence(e.detail, {fn, sequence, fallback})
 		);
-	}
+	};
 }
 
 export {sequencer};
