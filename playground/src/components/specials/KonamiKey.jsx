@@ -14,6 +14,10 @@ const KonamiSequence = [
 class KonamiKey extends React.Component {
 	state = {pressing: false, validated: false, count: 0};
 
+	/**
+	 *
+	 * @type {Sequencer}
+	 */
 	sequencer = new keys.Sequencer(this.props.speed);
 
 	ref = React.createRef();

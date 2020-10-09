@@ -39,6 +39,7 @@ const COMBOS = {
  *
  * @param {number} id
  * @return {string}
+ * @override
  */
 const event = id => `KeySequenceUpdated_${id}`;
 
@@ -46,6 +47,7 @@ const event = id => `KeySequenceUpdated_${id}`;
  * A Sequence consist of a callback and a list of keys to trigger it.
  *
  * @typedef {{fn: function, sequences: string[]}} Sequence
+ * @override
  */
 /**
  * Extend eventListener concept on a serie of keys.
@@ -57,6 +59,7 @@ class Sequencer {
 	/**
 	 * @param {number=} timeout
 	 * @param {boolean=} debug
+	 * @constructs Sequencer
 	 */
 	constructor(timeout, debug) {
 		this.#debug = debug;
@@ -118,6 +121,7 @@ class Sequencer {
 	 * @param {Node=} el
 	 * @returns {{keyDown: function}}
 	 * @public
+	 * @override
 	 */
 	mount = el => {
 		// Assign element to the one passed in parameters
@@ -185,6 +189,7 @@ class Sequencer {
 	 *
 	 * @param {Node=} el
 	 * @public
+	 * @override
 	 */
 	listen = el => {
 		// Get handlers and set them.
@@ -206,6 +211,7 @@ class Sequencer {
 	 *
 	 * @param {accessor} accessor
 	 * @public
+	 * @override
 	 */
 	dynamicKeys = accessor => {
 		if (this.#el == null) {
@@ -224,6 +230,7 @@ class Sequencer {
 	 * Set debug mode programmatically.
 	 *
 	 * @param {boolean} mode
+	 * @override
 	 */
 	setDebugMode = mode => {
 		this.#debug = mode;
@@ -233,6 +240,7 @@ class Sequencer {
 	 * Return current sequence of pressed keys.
 	 *
 	 * @return {string[]}
+	 * @override
 	 */
 	getSequence = () => this.#sequences;
 
@@ -241,6 +249,7 @@ class Sequencer {
 	 *
 	 * @param {string[]} keys
 	 * @return number
+	 * @override
 	 */
 	getValidationStatus = keys => {
 		let i = keys.length;
@@ -287,6 +296,7 @@ class Sequencer {
 	 * @param {string[]} sequence
 	 * @param {function=} fallback
 	 * @public
+	 * @override
 	 */
 	register = (sequence, fn, fallback) => {
 		if (this.#el == null) {

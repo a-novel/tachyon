@@ -1,9 +1,7 @@
 import babel from 'rollup-plugin-babel';
 import pkg from './package.json';
-import {terser} from 'rollup-plugin-terser';
 
 export default [
-	// CommonJS
 	{
 		inlineDynamicImports: true,
 		input: './src/index.js',
@@ -19,8 +17,7 @@ export default [
 		plugins: [
 			babel({
 				exclude: 'node_modules/**'
-			}),
-			terser() // minifies generated bundles
+			})
 		]
 	}
 ];
