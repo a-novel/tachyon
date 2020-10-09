@@ -14,6 +14,8 @@ A light framework for easier and advanced DOM manipulations.
         - [setDebugMode](#setdebugmode)
     - [Default key combos](#default-key-combos)
 - [os](#os)
+- [Selection](#selection)
+    - [getRange](#getrange)
 
 ## Keys
 
@@ -157,6 +159,89 @@ case os.OS.OTHER:
 
 }
 ```
+
+## Selection
+
+Tools to easily select text inside complex div structures.
+
+### getRange
+
+```javascript
+import {selection} from '@anovel/tachyon';
+
+const currentSelection = selection.getRange(element);
+```
+
+Returns the current caret range within a given element. The returned
+object is consisting of 3 keys :
+
+```json
+{
+  "absolute": {
+    "start": 0,
+    "end": 10,
+  },
+  "start": {
+    "container": "someDiv",
+    "offset": 0
+  },
+  "end": {
+    "container": "someDiv",
+    "offset": 4
+  }
+}
+```
+
+Start and End are provided by the default selection handlers. DOM cannot
+handle selection outside a textNode. Given the following HTML structure:
+
+```html
+<div>Lorem ipsum dolor <span>sit amet</span>, consectetur adipiscing elit.</div>
+```
+
+Now let's imagine an end user selected characters from offset 6 to 21:
+
+```html
+ipsum dolor <span>sit
+```
+
+If you run `window.getSelection().getRangeAt(0)`, you'll get a result
+similar to this one :
+
+```json
+{
+  "startContainer": "YourDiv",
+  "endContainer": "YourSpan",
+  "startOffset": 6,
+  "endOffset": 3,
+}
+```
+
+This is because your selection starts in the container `<div>` at offset 6,
+and ends in the `<span>` at offset 3. Those are the information returned within
+`start` and `end` keys.
+
+Now, for better convenience and readability, we'd like to know that offset 3
+in `<span>` is equivalent to the offset 21 in `<div>`, so we know in our text,
+independently from DOM partition, the caret goes from character 6 to 21.
+
+This is the goal of the returned `absolute` key. Absolute position will ignore
+the DOM partitioning within our parent element to return the actual positions
+of the caret bounds, as they appear to human eyes.
+
+### setRange
+
+```javascript
+import {selection} from '@anovel/tachyon';
+
+const currentSelection = selection.setRange(element, 6, 21);
+```
+
+Set selection range within an element. The advantages of this method, compared
+to default DOM handlers, are:
+- easier declaration
+- doesn't crash if off limits (will just stop if their is no more characters to select)
+- is compatible with element children DOM hierarchy (you don't have to select a direct textNode)
 
 # License
 
