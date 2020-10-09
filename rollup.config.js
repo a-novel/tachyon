@@ -1,4 +1,6 @@
 import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import resolve from 'rollup-plugin-node-resolve';
 import pkg from './package.json';
 
 export default [
@@ -7,7 +9,7 @@ export default [
 		input: './src/index.js',
 		output: [
 			{
-				file: './dist/index.js',
+				file: './lib/index.js',
 				format: 'cjs'
 			}
 		],
@@ -15,6 +17,8 @@ export default [
 			...Object.keys(pkg.dependencies || {})
 		],
 		plugins: [
+			commonjs(),
+			resolve(),
 			babel({
 				exclude: 'node_modules/**'
 			})

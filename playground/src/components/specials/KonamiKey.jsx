@@ -1,6 +1,6 @@
 import React from 'react';
 import css from './KonamiKey.module.css';
-import {keys} from '@anovel/tachyon';
+import {Sequencer} from '@anovel/tachyon';
 
 // Up Up Down Down Left Right Left Right b a
 const KonamiSequence = [
@@ -18,7 +18,7 @@ class KonamiKey extends React.Component {
 	 *
 	 * @type {Sequencer}
 	 */
-	sequencer = new keys.Sequencer(this.props.speed);
+	sequencer = new Sequencer(this.props.speed);
 
 	ref = React.createRef();
 

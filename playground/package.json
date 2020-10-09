@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@anovel/tachyon": "file:../anovel-tachyon-v0.4.6.tgz",
+    "@anovel/tachyon": "file:../anovel-tachyon-v0.5.1.tgz",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",

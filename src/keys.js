@@ -55,7 +55,7 @@ const event = id => `KeySequenceUpdated_${id}`;
  * @version 1.0.0
  * @author [Kushuh](https://github.com/Kushuh)
  */
-class Sequencer {
+export default class Sequencer {
 	/**
 	 * @param {number=} timeout
 	 * @param {boolean=} debug
@@ -310,5 +310,4 @@ class Sequencer {
 	};
 }
 
-export default Sequencer;
 export {COMBOS};
