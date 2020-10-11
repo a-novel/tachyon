@@ -5,6 +5,7 @@
   "scripts": {
     "build:test": "NODE_ENV=test rollup -c && NODE_ENV=",
     "build": "rollup -c",
+    "build:publish": "yarn build && yarn publish",
     "test": "yarn build:test && jest --watchAll --coverage --coverageDirectory=./coverage/jest"
   },
   "eslintConfig": {
