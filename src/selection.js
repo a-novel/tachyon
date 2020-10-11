@@ -29,21 +29,25 @@
  * @returns {number}
  */
 const getComplexOffset = (range, container, offset, ignore) => {
-	if (ignore == null || ignore.length === 0) {
-		return offset;
-	}
-
 	// Select content from 0 to offset. This allow us to count every static content occurring before our caret position,
 	// which are likely to alter it.
 	range.setEnd(container, offset);
 	const copy = range.cloneContents();
 
-	for (const selector of ignore) {
-		copy.querySelectorAll(selector).forEach(e => e ? e.innerHTML = '' : '');
+	if (ignore && ignore.length) {
+		for (const selector of ignore) {
+			copy.querySelectorAll(selector).forEach(e => {
+				if (e == null) {
+					return;
+				}
+
+				copy.removeChild(e);
+			});
+		}
 	}
 
 	// Remove static length from caret position.
-	return copy.innerText.length;
+	return [...copy.childNodes].reduce((acc, e) => e.TEXT_NODE ? acc + e.textContent.length : acc + e.innerText.length, 0);
 };
 
 /**
@@ -133,15 +137,15 @@ const getSelectionRange = (element, ignore) => {
 		// TODO : How do we deal with them ?
 		const range = win.getSelection().getRangeAt(0);
 
-		// Creating a copy of range allows to compute it while not interfering with the actual selection. We need such
-		// alterations in the getComplexOffset() method.
-		const preCaretRange = range.cloneRange();
-
 		// Default variable provided by js DOM.
 		startContainer = range.startContainer;
 		endContainer = range.endContainer;
 		startOffset = range.startOffset;
 		endOffset = range.endOffset;
+
+		// Creating a copy of range allows to compute it while not interfering with the actual selection. We need such
+		// alterations in the getComplexOffset() method.
+		const preCaretRange = range.cloneRange();
 
 		// Select the whole content under our element.
 		preCaretRange.selectNodeContents(element);
@@ -179,15 +183,16 @@ const getSelectionRange = (element, ignore) => {
  * @return {*}
  */
 const setSelectionRange = (element, start, end, ignore) => {
-	debugger;
-	// No need to do anything if no content is present.
-	if (element.innerText == null || element.innerText.length === 0) {
-		return {start: -1, end: -1, it: element.outerHTML};
-	}
-
 	// Secure way to get the equivalent of 'window' global in non DOM environment, which can be useful for testing, for
 	// example. It is more generally safer to avoid relying too much on globals.
 	const win = (element.ownerDocument || document).defaultView;
+	const sel = win.getSelection();
+
+	// No need to do anything if no content is present.
+	if (element.innerText == null || element.innerText.length === 0) {
+		sel.removeAllRanges();
+		return {start: 0, end: 0};
+	}
 
 	// Cap caret position to avoid overflow error.
 	start = Math.min(element.innerText.length, start);
@@ -202,11 +207,10 @@ const setSelectionRange = (element, start, end, ignore) => {
 	range.setStart(startNode || element, startOffset);
 	range.setEnd(endNode || element, endOffset);
 
-	const sel = win.getSelection();
 	sel.removeAllRanges();
 	sel.addRange(range);
 
-	return {start, end, it2: element.innerText};
+	return {start, end};
 };
 
 export {getSelectionRange as getRange, setSelectionRange as setRange};

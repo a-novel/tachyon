@@ -10,10 +10,10 @@ A light framework for easier and advanced DOM manipulations.
     - [Register sequences](#register-sequences)
     - [Special methods](#special-methods)
         - [getSequence](#getsequence)
-        - [getValidationStatus](#getvalidationstatus)
+        - [getValidationProgress](#getvalidationprogress)
         - [setDebugMode](#setdebugmode)
     - [Default key combos](#default-key-combos)
-- [os](#os)
+- [Os](#os)
 - [Selection](#selection)
     - [getRange](#getrange)
     - [setRange](#setrange)
@@ -55,8 +55,8 @@ class MyComponent extends React.Component {
 
 ### Sequencer Initialization
 
-A sequencer is a custom class that will record a serie of pressed keys within the DOM
-element it listens to. I can take 2 optional parameters.
+A Sequencer is a custom class that will record a list of pressed keys within the DOM
+element it is attached to. I can take 2 optional parameters.
 
 ```javascript
 const sequencer = new Sequencer(400, false);
@@ -73,6 +73,9 @@ Once your sequencer is initialized, you need to attach it an element to listen t
 // element is a DOM element.
 sequencer.listen(element);
 ```
+
+> Not adding any element or putting `null` value will attach the listener to the whole
+> document.
 
 ### Register sequences
 
@@ -101,7 +104,7 @@ Returns the latest recorded sequence of keys.
 const currentSequence = sequencer.getSequence();
 ```
 
-#### getValidationStatus
+#### getValidationProgress
 
 Get the progression of a given sequence :
 
@@ -110,7 +113,7 @@ Get the progression of a given sequence :
 // If getSequence() ends with ['a', 'b'], returns 2
 // If getSequence() ends with ['a'], returns 1
 // If getSequence() doesn't end with any of the sequence prefixes, returns 0
-const progress = sequencer.getValidationStatus(['a', 'b', 'c']);
+const progress = sequencer.getValidationProgress(['a', 'b', 'c']);
 ```
 
 #### setDebugMode
@@ -137,7 +140,7 @@ them via `keys.COMBOS`.
 | PASTE | Ctrl+v (Cmd+v for macOS) |
 | KONAMI_CODE | up up down down left right left right b a |
 
-## os
+## Os
 
 Return information about the client OS.
 
@@ -236,6 +239,9 @@ of the caret bounds, as they appear to human eyes.
 ```javascript
 import {setRange} from '@anovel/tachyon';
 
+// Returns {start: 6, end: 21} if both bounds are in limits,
+// {start: x, end: y} if one or both limit was overflowing or
+// {start: -1, end: -1} if content is empty.
 const currentSelection = setRange(element, 6, 21);
 ```
 
@@ -244,6 +250,9 @@ to default DOM handlers, are:
 - easier declaration
 - doesn't crash if off limits (will just stop if their is no more characters to select)
 - is compatible with element children DOM hierarchy (you don't have to select a direct textNode)
+
+`setRange` returns an object with the actual absolute bounds that were set (which may differ
+from parameters if one or both were off limits).
 
 ### Range ignore
 

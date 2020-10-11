@@ -43,6 +43,17 @@ const COMBOS = {
  */
 const event = id => `KeySequenceUpdated_${id}`;
 
+window.tachyonDATA = {sequencerID: 1};
+
+const LOGS = {
+	INTRO: (id, timeout) => `new sequencer mounted:\n\tID: ${id}\n\ttimeout: ${timeout}`,
+	CURRENT_SEQUENCES: list => `current sequence: ${JSON.stringify(list)}`,
+	RUNNING_CALLBACK: fn => `running callback ${fn.name || 'anonymous'}`,
+	RUNNING_FALLBACK: fn => `running fallback ${fn.name || 'anonymous'}`,
+	ERROR_ALREADYMOUNTED: 'this sequencer has already been attached to an element',
+	ERROR_NOTMOUNTEDYET: 'sequencer is not yet initialized, you cannot attach listeners to it'
+};
+
 /**
  * A Sequence consist of a callback and a list of keys to trigger it.
  *
@@ -64,7 +75,12 @@ export default class Sequencer {
 	constructor(timeout, debug) {
 		this.#debug = debug;
 		this.#timeout = timeout || 400;
-		this.#id = new Date().getTime();
+		this.#id = window.tachyonDATA.sequencerID;
+		window.tachyonDATA.sequencerID++;
+
+		if (debug) {
+			console.log(LOGS.INTRO(this.#id, this.#timeout));
+		}
 	}
 
 	/**
@@ -124,12 +140,16 @@ export default class Sequencer {
 	 * @override
 	 */
 	mount = el => {
+		if (this.#el != null) {
+			throw new Error(LOGS.ERROR_ALREADYMOUNTED);
+		}
+
 		// Assign element to the one passed in parameters
 		this.#el = el || document;
 
 		if (this.#debug) {
 			this.#el.addEventListener(event(this.#id), () => {
-				console.log(this.#sequences);
+				console.log(LOGS.CURRENT_SEQUENCES(this.#sequences));
 			});
 		}
 
@@ -151,7 +171,7 @@ export default class Sequencer {
 				/**
 				 * @param {KeyboardEvent} ee
 				 */
-				const removeKey = ee => {
+				const removeKey = () => {
 					// Callback when the key needs to be removed from current sequence.
 					const terminateCallback = () => {
 						// Current offset of the key.
@@ -192,6 +212,10 @@ export default class Sequencer {
 	 * @override
 	 */
 	listen = el => {
+		if (this.#el != null) {
+			throw new Error(LOGS.ERROR_ALREADYMOUNTED);
+		}
+
 		// Get handlers and set them.
 		const {keyDown} = this.mount(el);
 		this.#el.addEventListener('keydown', keyDown);
@@ -201,21 +225,16 @@ export default class Sequencer {
 	};
 
 	/**
-	 * @callback accessor
-	 * @return {{sequence: Sequence[], fn: function, [fallback]: function}}
-	 */
-
-	/**
 	 * Allow dynamic key combos to be listened. Combos are accessed via a function that has access to the latest array
 	 * of {@link Sequence} to listen to, so they can change over setTime.
 	 *
-	 * @param {accessor} accessor
+	 * @param {function: {sequence: Sequence[], fn: function, [fallback]: function}[]} accessor
 	 * @public
 	 * @override
 	 */
 	dynamicKeys = accessor => {
 		if (this.#el == null) {
-			throw new Error('sequencer is not yet initialized, you cannot attach listeners to it');
+			throw new Error(LOGS.ERROR_NOTMOUNTEDYET);
 		}
 
 		this.#el.addEventListener(
@@ -251,7 +270,7 @@ export default class Sequencer {
 	 * @return number
 	 * @override
 	 */
-	getValidationStatus = keys => {
+	getValidationProgress = keys => {
 		let i = keys.length;
 		while (keys.slice(0, i).join(';') !== this.#sequences.slice(-i).join(';') && i > 0) {
 			i--;
@@ -259,6 +278,11 @@ export default class Sequencer {
 
 		return i;
 	};
+
+	/**
+	 * @return {number}
+	 */
+	getID = () => this.#id;
 
 	/**
 	 * Check if the current sequence matches a combo.
@@ -276,13 +300,13 @@ export default class Sequencer {
 	#checkSequence = (e, registration) => {
 		if (this.#isSequenceValidated(registration.sequence.join(' '), this.#sequences.join(' '))) {
 			if (this.#debug) {
-				console.log(`running ${registration.fn.name}`);
+				console.log(LOGS.RUNNING_CALLBACK(registration.fn));
 			}
 
 			registration.fn(e);
 		} else if (registration.fallback) {
 			if (this.#debug) {
-				console.log(`running ${registration.fallback.name}`);
+				console.log(LOGS.RUNNING_FALLBACK(registration.fallback));
 			}
 
 			registration.fallback(e);
@@ -300,7 +324,7 @@ export default class Sequencer {
 	 */
 	register = (sequence, fn, fallback) => {
 		if (this.#el == null) {
-			throw new Error('sequencer is not yet initialized, you cannot attach listeners to it');
+			throw new Error(LOGS.ERROR_NOTMOUNTEDYET);
 		}
 
 		this.#el.addEventListener(
@@ -310,4 +334,4 @@ export default class Sequencer {
 	};
 }
 
-export {COMBOS};
+export {COMBOS, LOGS};

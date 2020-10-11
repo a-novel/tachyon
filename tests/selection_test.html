@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Selection range test</title>
+</head>
+<body>
+<div>
+    <div id='single-text-node'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ut ornare erat. Suspendisse id quam varius, malesuada eros a, molestie sem. Fusce nec lacinia justo, sed ornare ligula. Vivamus eget pretium odio. Pellentesque sem diam, pulvinar non pretium non, elementum lobortis ligula. Morbi elementum suscipit metus. Ut egestas mi et est condimentum, a rhoncus mi elementum. Vivamus eget convallis dui, id molestie sem.</div>
+    <div id='nested-text-node'>Lorem ipsum <div class="ignore1">dolor sit amet, <span class="ignore2">consectetur <span class="ignore1">adipiscing</span></span> elit.</div> Curabitur ut ornare erat. Suspendisse id quam varius, malesuada eros a, molestie sem. Fusce nec lacinia justo, sed ornare ligula. Vivamus eget pretium odio. Pellentesque sem diam, pulvinar non pretium non, elementum lobortis ligula. Morbi elementum suscipit metus. Ut egestas mi et est condimentum, a rhoncus mi elementum. Vivamus eget convallis dui, id molestie sem.</div>
+    <div id='empty-node'></div>
+</div>
+<script src="../dist/index.js"></script>
+</body>
+</html>
