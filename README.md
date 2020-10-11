@@ -10,6 +10,7 @@
     <img alt="David" src="https://img.shields.io/david/dev/a-novel/tachyon?style=flat-square">
     <img alt="npm bundle size (scoped)" src="https://img.shields.io/bundlephobia/min/@anovel/tachyon?style=flat-square">
 </div>
+<br/>
 
 A light framework for easier and advanced DOM manipulations.
 
