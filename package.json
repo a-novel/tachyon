@@ -6,7 +6,8 @@
     "build:test": "NODE_ENV=test rollup -c && NODE_ENV=",
     "build": "rollup -c",
     "build:publish": "yarn build && yarn publish",
-    "test": "yarn build:test && jest --watchAll --coverage --coverageDirectory=./coverage/jest"
+    "test": "yarn build:test && jest --watchAll --coverage --coverageDirectory=./coverage/jest",
+    "coverage:upload": "./node_modules/.bin/codecov --token='1909a8c8-a0db-4d56-8efa-47f7e6ef641d'"
   },
   "eslintConfig": {
     "extends": "react-app"
