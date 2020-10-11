@@ -6,7 +6,9 @@
 </div>
 
 <div align="center">
-    
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/a-novel/tachyon?style=flat-square">
+    <img alt="David" src="https://img.shields.io/david/dev/a-novel/tachyon?style=flat-square">
+    <img alt="npm bundle size (scoped)" src="https://img.shields.io/bundlephobia/min/@anovel/tachyon?style=flat-square">
 </div>
 
 A light framework for easier and advanced DOM manipulations.

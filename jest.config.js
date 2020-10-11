@@ -37,7 +37,9 @@ module.exports = {
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: [
     "json",
-    "text"
+    "text",
+    "lcov",
+    "clover",
   ],
 
   // An object that configures minimum threshold enforcement for coverage results
@@ -96,7 +98,7 @@ module.exports = {
   // projects: undefined,
 
   // Use this configuration option to add custom reporters to Jest
-  reporters: ["default", "jest-junit"],
+  // reporters: undefined,
 
   // Automatically reset mock state between every test
   // resetMocks: false,
