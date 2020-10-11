@@ -1,5 +1,9 @@
 # Tachyon
 
+<div align="center">
+    <img alt="npm (scoped)" src="https://img.shields.io/npm/v/@anovel/tachyon?style=for-the-badge">
+</div>
+
 A light framework for easier and advanced DOM manipulations.
 
 > The following functions require a client DOM environment to run. They are meant
