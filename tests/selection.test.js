@@ -138,5 +138,42 @@ describe(
 
 			checkSelectionOutput(output, 10, output.content, 10, 368);
 		});
+
+		it('should match with ignore parameter', async () => {
+			let output = await page.evaluate(() => {
+				// Fix eslint warnings.
+				window.tachyon = window.tachyon || null;
+				if (window.tachyon == null) {
+					return new Error(`cannot find tachyon module`);
+				}
+
+				const stn = document.getElementById('single-text-node');
+				const witnessRange = tachyon.setRange(stn, 10, 30, ['.ignore1']);
+				const selectionRange = tachyon.getRange(stn);
+
+				return {witnessRange, selectionRange, content: stn.innerText.length};
+			});
+
+			checkSelectionOutput(output, 10, 30, 10, 30);
+
+			output = await page.evaluate(() => {
+				// Fix eslint warnings.
+				window.tachyon = window.tachyon || null;
+				if (window.tachyon == null) {
+					return new Error(`cannot find tachyon module`);
+				}
+
+				const stn = document.getElementById('nested-text-node');
+				const witnessRange = tachyon.setRange(stn, 10, 30, ['.ignore1']);
+				const selectionRange = tachyon.getRange(stn, ['.ignore1']);
+				const fullSelectionRange = tachyon.getRange(stn);
+
+				return {witnessRange, selectionRange, fullSelectionRange, content: stn.innerText.length};
+			});
+
+			checkSelectionOutput(output, 10, 30, 10, 18);
+			expect(output.fullSelectionRange.absolute.start).toEqual(10);
+			expect(output.fullSelectionRange.absolute.end).toEqual(74);
+		});
 	}
 );

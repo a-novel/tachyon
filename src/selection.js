@@ -37,17 +37,21 @@ const getComplexOffset = (range, container, offset, ignore) => {
 	if (ignore && ignore.length) {
 		for (const selector of ignore) {
 			copy.querySelectorAll(selector).forEach(e => {
-				if (e == null) {
+				if (e == null || e.innerHTML == null || e.innerHTML === '') {
 					return;
 				}
 
-				copy.removeChild(e);
+				e.innerHTML = '';
 			});
 		}
 	}
 
 	// Remove static length from caret position.
-	return [...copy.childNodes].reduce((acc, e) => e.TEXT_NODE ? acc + e.textContent.length : acc + e.innerText.length, 0);
+	return [...copy.childNodes].reduce((acc, e) => {
+		if (e == null) return acc;
+		else if (e.TEXT_NODE) return acc + e.textContent.length;
+		else return acc + e.innerText.length;
+	}, 0);
 };
 
 /**
