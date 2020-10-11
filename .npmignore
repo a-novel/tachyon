@@ -9,8 +9,9 @@ jest.config.js
 env.js
 junit.xml
 Jenkinsfile
+.env.test
 
-playground/
+coverage/
 src/
 
 tests/
