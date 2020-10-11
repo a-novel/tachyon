@@ -36,6 +36,7 @@ A light framework for easier and advanced DOM manipulations.
     - [getRange](#getrange)
     - [setRange](#setrange)
     - [Range ignore](#range-ignore)
+- [License](#license)
 
 ## Keys
 
