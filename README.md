@@ -2,6 +2,11 @@
 
 <div align="center">
     <img alt="npm (scoped)" src="https://img.shields.io/npm/v/@anovel/tachyon?style=for-the-badge">
+    <img alt="GitHub" src="https://img.shields.io/github/license/a-novel/tachyon?style=for-the-badge">
+</div>
+
+<div align="center">
+    
 </div>
 
 A light framework for easier and advanced DOM manipulations.

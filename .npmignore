@@ -7,6 +7,8 @@ node_modules/
 rollup.config.js
 jest.config.js
 env.js
+junit.xml
+Jenkinsfile
 
 playground/
 src/
