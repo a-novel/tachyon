@@ -36,6 +36,9 @@ A light framework for easier and advanced DOM manipulations.
     - [getRange](#getrange)
     - [setRange](#setrange)
     - [Range ignore](#range-ignore)
+- [Url](#url)
+    - [goTo](#goto)
+    - [isActive](#isactive)
 - [License](#license)
 
 ## Keys
@@ -43,6 +46,7 @@ A light framework for easier and advanced DOM manipulations.
 An advanced eventListener to easily watch for complex key combos.
 
 A simple use case is given below.
+
 ```jsx
 import React from 'react';
 import {Sequencer} from '@anovel/tachyon';
@@ -298,6 +302,56 @@ ipsum dolor <span>sit amet</span>, c
 
 since it will not count what is between spans (although it will select it since
 selection cannot be cut half).
+
+# Url
+
+## goTo
+
+Navigate to the page passed as parameter.
+
+```javascript
+import {goTo} from '@anovel/tachyon';
+
+// Navigates to the url '/foo/bar'
+goTo('/foo/bar');
+```
+
+You can pass an optional configuration argument:
+
+```javascript
+import {goTo} from '@anovel/tachyon';
+
+// Navigates to the url '/foo/bar' in another tab.
+goTo('/foo/bar', {openOutside: true});
+```
+
+| Option | Type | Description |
+| :--- | :--- | :--- |
+| urlParams | object | Populates the url with given parameters.<br/>`goTo('/:foo', {urlParams: {foo: 'bar'}}) -> opens /bar` |
+| urlQuery | object | Generates query string.<br/>`goTo('/home', {urlQuery: {foo: 'bar'}}) -> opens /home?foo=bar` |
+| openOutside | boolean | Opens url in a new window. |
+| skip | boolean | Replace last history entry. |
+| location | object | Custom location object with pathname and other location data. It uses `window.location` by default. |
+
+## isActive
+
+Check if the current url matches a route.
+
+```javascript
+import {isActive} from '@anovel/tachyon';
+
+const active = isActive('/hello/world');
+// /hello/world     -> true
+// /hello/world/42  -> true
+// /hello           -> false
+```
+
+You can pass an optional configuration argument:
+
+| Option | Type | Description |
+| :--- | :--- | :--- |
+| exact | boolean | Only returns if both url matches exactly (ignoring queryParams). |
+| location | object | Custom location object with pathname and other location data. It uses `window.location` by default. |
 
 # License
 

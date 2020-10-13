@@ -33,15 +33,15 @@ describe('test url functions', () => {
 	it('should return correct flag for isActive', () => {
 		const currentHistory = {pathname: '/hello/world/42'};
 
-		expect(isActive('/', {history: currentHistory})).toBeFalsy();
-		expect(isActive('/hello/world/42', {history: currentHistory})).toBeTruthy();
-		expect(isActive('/hello/world/42/123456', {history: currentHistory})).toBeFalsy();
-		expect(isActive(['/hello/world/42', '/hello/world/42/123456'], {history: currentHistory})).toBeTruthy();
+		expect(isActive('/', {location: currentHistory})).toBeFalsy();
+		expect(isActive('/hello/world/42', {location: currentHistory})).toBeTruthy();
+		expect(isActive('/hello/world/42/123456', {location: currentHistory})).toBeFalsy();
+		expect(isActive(['/hello/world/42', '/hello/world/42/123456'], {location: currentHistory})).toBeTruthy();
 
 		currentHistory.pathname = '/hello/world/42/123456';
 
-		expect(isActive('/hello/world/42', {history: currentHistory})).toBeTruthy();
-		expect(isActive('/hello/:greet/42', {history: currentHistory})).toBeTruthy();
-		expect(isActive('/hello/world/42', {history: currentHistory, exact: true})).toBeFalsy();
+		expect(isActive('/hello/world/42', {location: currentHistory})).toBeTruthy();
+		expect(isActive('/hello/:greet/42', {location: currentHistory})).toBeTruthy();
+		expect(isActive('/hello/world/42', {location: currentHistory, exact: true})).toBeFalsy();
 	});
 });

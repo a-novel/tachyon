@@ -48,19 +48,19 @@ const toQueryString = query => Object.entries(query).map(([key, value]) => `${ke
  * Navigate to url.
  *
  * @param {string=} destination
- * @param {Object=} params
+ * @param {Object=} urlParams
  * @param {boolean=} openOutside
  * @param {boolean=} skip
- * @param {Object=} query
+ * @param {Object=} urlQuery
  * @param {History=} history
  */
 /* c8 ignore next 12 */
 const goTo = (
 	destination = '/',
-	{params, openOutside, skip, query, history} = {}
+	{urlParams, openOutside, skip, urlQuery, location} = {}
 ) => {
-	const destinationUrl = `${fillParams(destination, params)}?${toQueryString(query)}`;
-	const currentURL = (history || window.location).pathname + (history || window.location).search;
+	const destinationUrl = `${fillParams(destination, urlParams)}?${toQueryString(urlQuery)}`;
+	const currentURL = (location || window.location).pathname + (location || window.location).search;
 
 	if (destinationUrl !== currentURL) {
 		openOutside ?
@@ -76,13 +76,13 @@ const goTo = (
  * @param {History=} history
  * @return {boolean}
  */
-const isActive = (destination, {exact, history} = {}) => {
+const isActive = (destination, {exact, location} = {}) => {
 	if (destination.constructor === Array) {
-		return destination.map(path => isActive(path, {exact, history})).find(x => x === true);
+		return destination.map(path => isActive(path, {exact, location})).find(x => x === true);
 	}
 
 	const destinationElements = destination.split('/');
-	const currentElements = (history || window.location).pathname.split('/');
+	const currentElements = (location || window.location).pathname.split('/');
 
 	if (destinationElements.length > currentElements.length) {
 		return false;
