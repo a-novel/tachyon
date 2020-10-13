@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import {afterEach, beforeEach, describe, it, jest} from '@jest/globals';
+import {afterEach, beforeEach, describe, it, jest, expect} from '@jest/globals';
 import {Sequencer} from '../src/index';
 import {LOGS} from '../src/keys';
 

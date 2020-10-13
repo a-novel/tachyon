@@ -6,6 +6,7 @@
  *
  * @type {{OTHER: string, LINUX: string, WINDOWS: string, MACOS: string, IOS: string, ANDROID: string}}
  */
+/* c8 ignore next 8 */
 const OS = {
 	WINDOWS: 'Windows',
 	LINUX: 'Linux',
@@ -22,6 +23,7 @@ const OS = {
  * @author [Kushuh](https://github.com/Kushuh)
  * @return {string}
  */
+/* c8 ignore next 23 */
 const getOS = () => {
 	const userAgent = window.navigator.userAgent;
 	const platform = window.navigator.platform;
