@@ -59,7 +59,7 @@ const goTo = (
 	destination = '/',
 	{urlParams, openOutside, skip, urlQuery, location} = {}
 ) => {
-	const destinationUrl = `${fillParams(destination, urlParams)}?${toQueryString(urlQuery)}`;
+	const destinationUrl = `${fillParams(destination, urlParams || {})}?${toQueryString(urlQuery || {})}`;
 	const currentURL = (location || window.location).pathname + (location || window.location).search;
 
 	if (destinationUrl !== currentURL) {
