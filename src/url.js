@@ -52,15 +52,15 @@ const toQueryString = query => Object.entries(query).map(([key, value]) => `${ke
  * @param {boolean=} openOutside
  * @param {boolean=} skip
  * @param {Object=} urlQuery
- * @param {History=} history
+ * @param {History} history
  */
 /* c8 ignore next 12 */
 const goTo = (
 	destination = '/',
-	{urlParams, openOutside, skip, urlQuery, location} = {}
+	{urlParams, openOutside, skip, urlQuery, history}
 ) => {
 	const destinationUrl = `${fillParams(destination, urlParams || {})}?${toQueryString(urlQuery || {})}`;
-	const currentURL = (location || window.location).pathname + (location || window.location).search;
+	const currentURL = history.location.pathname + history.location.search;
 
 	if (destinationUrl !== currentURL) {
 		openOutside ?

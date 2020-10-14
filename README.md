@@ -311,18 +311,20 @@ Navigate to the page passed as parameter.
 
 ```javascript
 import {goTo} from '@anovel/tachyon';
+import {history} from 'path/to/history/handler';
 
 // Navigates to the url '/foo/bar'
-goTo('/foo/bar');
+goTo('/foo/bar', {history});
 ```
 
-You can pass an optional configuration argument:
+You can pass optional configuration arguments:
 
 ```javascript
 import {goTo} from '@anovel/tachyon';
+import {history} from 'path/to/history/handler';
 
 // Navigates to the url '/foo/bar' in another tab.
-goTo('/foo/bar', {openOutside: true});
+goTo('/foo/bar', {history, openOutside: true});
 ```
 
 | Option | Type | Description |
@@ -331,7 +333,7 @@ goTo('/foo/bar', {openOutside: true});
 | urlQuery | object | Generates query string.<br/>`goTo('/home', {urlQuery: {foo: 'bar'}}) -> opens /home?foo=bar` |
 | openOutside | boolean | Opens url in a new window. |
 | skip | boolean | Replace last history entry. |
-| location | object | Custom location object with pathname and other location data. It uses `window.location` by default. |
+| history | object | React history handler. |
 
 ## isActive
 
