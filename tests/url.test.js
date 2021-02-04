@@ -31,17 +31,54 @@ describe('test url functions', () => {
 	});
 
 	it('should return correct flag for isActive', () => {
-		const currentHistory = {pathname: '/hello/world/42'};
+		const pathPM = '/:foo/bar/';
+		const pathPMNP = '/:foo/bar';
+		const path = '/foo/bar/';
+		const pathNP = '/foo/bar';
 
-		expect(isActive('/', {location: currentHistory})).toBeFalsy();
-		expect(isActive('/hello/world/42', {location: currentHistory})).toBeTruthy();
-		expect(isActive('/hello/world/42/123456', {location: currentHistory})).toBeFalsy();
-		expect(isActive(['/hello/world/42', '/hello/world/42/123456'], {location: currentHistory})).toBeTruthy();
+		/**
+		 *
+		 * @param str
+		 * @return History
+		 */
+		const newLocation = str => {
+			const output = {}/** History*/
+			output.pathname = str;
+			return output
+		};
 
-		currentHistory.pathname = '/hello/world/42/123456';
+		expect(isActive(path, {location: newLocation('/')})).toBeFalsy();
+		expect(isActive(pathNP, {location: newLocation('/')})).toBeFalsy();
 
-		expect(isActive('/hello/world/42', {location: currentHistory})).toBeTruthy();
-		expect(isActive('/hello/:greet/42', {location: currentHistory})).toBeTruthy();
-		expect(isActive('/hello/world/42', {location: currentHistory, exact: true})).toBeFalsy();
+		expect(isActive(path, {location: newLocation('/foo/bar/qux'), exact: true})).toBeFalsy();
+		expect(isActive(path, {location: newLocation('/foo/bar/qux/'), exact: true})).toBeFalsy();
+		expect(isActive(pathNP, {location: newLocation('/foo/bar/qux'), exact: true})).toBeFalsy();
+		expect(isActive(pathNP, {location: newLocation('/foo/bar/qux/'), exact: true})).toBeFalsy();
+
+		expect(isActive(path, {location: newLocation('/foo/bar/qux')})).toBeTruthy();
+		expect(isActive(path, {location: newLocation('/foo/bar/qux/')})).toBeTruthy();
+		expect(isActive(pathNP, {location: newLocation('/foo/bar/qux')})).toBeTruthy();
+		expect(isActive(pathNP, {location: newLocation('/foo/bar/qux/')})).toBeTruthy();
+
+		expect(isActive(path, {location: newLocation('/foo/bar'), exact: true})).toBeTruthy();
+		expect(isActive(path, {location: newLocation('/foo/bar/'), exact: true})).toBeTruthy();
+		expect(isActive(pathNP, {location: newLocation('/foo/bar'), exact: true})).toBeTruthy();
+		expect(isActive(pathNP, {location: newLocation('/foo/bar/'), exact: true})).toBeTruthy();
+
+		expect(isActive(pathPM, {location: newLocation('/world/bar/qux'), exact: true})).toBeFalsy();
+		expect(isActive(pathPM, {location: newLocation('/world/bar/qux/'), exact: true})).toBeFalsy();
+		expect(isActive(pathPMNP, {location: newLocation('/world/bar/qux'), exact: true})).toBeFalsy();
+		expect(isActive(pathPMNP, {location: newLocation('/world/bar/qux/'), exact: true})).toBeFalsy();
+
+		expect(isActive(pathPM, {location: newLocation('/world/bar/qux')})).toBeTruthy();
+		expect(isActive(pathPM, {location: newLocation('/world/bar/qux/')})).toBeTruthy();
+		expect(isActive(pathPMNP, {location: newLocation('/world/bar/qux')})).toBeTruthy();
+		expect(isActive(pathPMNP, {location: newLocation('/world/bar/qux/')})).toBeTruthy();
+
+		expect(isActive(pathPM, {location: newLocation('/world/bar'), exact: true})).toBeTruthy();
+		expect(isActive(pathPM, {location: newLocation('/world/bar/'), exact: true})).toBeTruthy();
+		expect(isActive(pathPMNP, {location: newLocation('/world/bar'), exact: true})).toBeTruthy();
+		expect(isActive(pathPMNP, {location: newLocation('/world/bar/'), exact: true})).toBeTruthy();
+
 	});
 });

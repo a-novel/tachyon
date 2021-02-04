@@ -73,7 +73,7 @@ const goTo = (
  *
  * @param {string|string[]} destination
  * @param {boolean=} exact
- * @param {History=} history
+ * @param {History=} location
  * @return {boolean}
  */
 const isActive = (destination, {exact, location} = {}) => {
@@ -81,8 +81,18 @@ const isActive = (destination, {exact, location} = {}) => {
 		return destination.map(path => isActive(path, {exact, location})).find(x => x === true);
 	}
 
+	if (!destination.endsWith('/')) {
+		destination += "/"
+	}
+
+	let {pathname} = location || window.location;
+
+	if (!pathname.endsWith('/')) {
+		pathname += "/"
+	}
+
 	const destinationElements = destination.split('/');
-	const currentElements = (location || window.location).pathname.split('/');
+	const currentElements = pathname.split('/');
 
 	if (destinationElements.length > currentElements.length) {
 		return false;
@@ -95,7 +105,7 @@ const isActive = (destination, {exact, location} = {}) => {
 	for (const index in destinationElements) {
 		const element = destinationElements[index];
 
-		if (element.includes(':')) {
+		if (element.includes(':') || element === "") {
 			continue;
 		}
 
