@@ -1,29 +1,29 @@
-// Created and maintained by Kushuh.
-// https://github.com/Kushuh - kuzanisu@gmail.com
+/**
+ * @author Team Anovel {@link https://github.com/a-novel}
+ * */
 
+/* c8 ignore next 13 */
 /**
  * Shorthands for OS platforms.
  *
- * @type {{OTHER: string, LINUX: string, WINDOWS: string, MACOS: string, IOS: string, ANDROID: string}}
+ * @type {Object.<string, string>}
  */
-/* c8 ignore next 8 */
 const OS = {
 	WINDOWS: 'Windows',
 	LINUX: 'Linux',
-	MACOS: 'MacOS',
-	IOS: 'IOS',
+	MACOS: 'macOS',
+	IOS: 'iOS',
 	ANDROID: 'Android',
 	OTHER: 'unknown'
 };
 
+
+/* c8 ignore next 28 */
 /**
- * Return the operating system the current user is running on.
+ * Returns the current client operating system.
  *
- * @version 1.0.0
- * @author [Kushuh](https://github.com/Kushuh)
- * @return {string}
+ * @return {string} os - the os string (may be found in {@link OS} object)
  */
-/* c8 ignore next 23 */
 const getOS = () => {
 	const userAgent = window.navigator.userAgent;
 	const platform = window.navigator.platform;

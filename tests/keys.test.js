@@ -1,381 +1,139 @@
-/**
- * @jest-environment jsdom
- */
-
-import {afterEach, beforeEach, describe, it, jest, expect} from '@jest/globals';
-import {Sequencer} from '../src/index';
-import {LOGS} from '../src/keys';
-
-// 400 keys.
-const longSequence = [
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-];
+import {describe, it} from '@jest/globals';
+import Sequencer, {COMBOS} from '../src/keys';
 
 describe(
-	'test Sequencer class',
+	'test keys sequencer',
 	() => {
-		let callback;
-		let fallback;
-		let callback2;
-		let fallback2;
-
-		beforeEach(() => {
-			callback = jest.fn();
-			fallback = jest.fn();
-			callback2 = jest.fn();
-			fallback2 = jest.fn();
-		});
-
-		afterEach(() => {
-			callback.mockClear();
-			fallback.mockClear();
-			callback2.mockClear();
-			fallback2.mockClear();
-		});
-
-		it('should record 4 concurrent keys', () => {
-			const sequencer = new Sequencer(50);
-			sequencer.listen();
-			sequencer.register(['a', 'b', 'c', 'd'], callback);
-			sequencer.register(['c', 'd', 'a', 'b'], callback2);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-
-			expect(callback).toBeCalledTimes(0);
-			expect(callback2).toBeCalledTimes(0);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-
-			expect(callback).toBeCalledTimes(1);
-			expect(callback2).toBeCalledTimes(0);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-
-			expect(callback).toBeCalledTimes(1);
-			expect(callback2).toBeCalledTimes(1);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-
-			expect(callback).toBeCalledTimes(2);
-			expect(callback2).toBeCalledTimes(1);
-		});
-
-		it('should record 400 concurrent keys', () => {
-			const sequencer = new Sequencer(50);
-			sequencer.listen();
-			sequencer.register(longSequence, callback);
-
-			expect(callback).toBeCalledTimes(0);
-			for(const key of longSequence) {
-				document.dispatchEvent(new KeyboardEvent('keydown', {'key': key}));
-			}
-
-			expect(callback).toBeCalledTimes(1);
-		});
-
-		it('should call fallback correctly', () => {
-			const sequencer = new Sequencer(50);
-			sequencer.listen();
-			sequencer.register(['a', 'b', 'c', 'd'], callback, fallback);
-			sequencer.register(['c', 'd', 'a', 'b'], callback2);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-
-			expect(callback).toBeCalledTimes(1);
-			expect(fallback).toBeCalledTimes(4);
-			expect(callback2).toBeCalledTimes(0);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-
-			expect(callback).toBeCalledTimes(1);
-			expect(fallback).toBeCalledTimes(6);
-			expect(callback2).toBeCalledTimes(1);
-		});
-
-		it('should return correct sequence of keys', () => {
-			const sequencer = new Sequencer(50);
-			sequencer.listen();
-
-			expect(sequencer.getSequence()).toEqual([]);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getSequence()).toEqual(['a']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c', 'd']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c', 'd', 'a']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c', 'd', 'a', 'b']);
-		});
-
-		it('should return correct progress values', () => {
-			const sequencer = new Sequencer(50);
-			sequencer.listen();
-
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(0);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(1);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(1);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(2);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(3);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(4);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(1);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(2);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'e'}));
-			expect(sequencer.getValidationProgress(['a', 'b', 'c', 'd'])).toEqual(0);
-		});
-
-		it('should not mix between sequencers', () => {
+		it('should hold keys', () => {
+			const sequence = 'abcdefghijklmnopqrstuvwxyz0123456789'.split('');
+			const compare = 'abcdefghijklmnopqrstuvwxyz0123456789'.split('').reverse();
 			const sequencer = new Sequencer();
-			const sequencer2 = new Sequencer();
 
-			sequencer.listen();
-			sequencer.register(['a', 'b', 'c', 'd'], callback);
-
-			expect(sequencer.getSequence()).toEqual([]);
-			expect(sequencer2.getSequence()).toEqual([]);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getSequence()).toEqual(['a']);
-			expect(sequencer2.getSequence()).toEqual([]);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a']);
-			expect(sequencer2.getSequence()).toEqual([]);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b']);
-			expect(sequencer2.getSequence()).toEqual([]);
-
-			sequencer2.listen();
-			sequencer2.register(['a', 'b', 'c', 'd'], callback2);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c']);
-			expect(sequencer2.getSequence()).toEqual(['c']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c', 'd']);
-			expect(sequencer2.getSequence()).toEqual(['c', 'd']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c', 'd', 'a']);
-			expect(sequencer2.getSequence()).toEqual(['c', 'd', 'a']);
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'b', 'c', 'd', 'a', 'b']);
-			expect(sequencer2.getSequence()).toEqual(['c', 'd', 'a', 'b']);
-
-			expect(callback).toBeCalledTimes(1);
-			expect(callback2).toBeCalledTimes(0);
-		});
-
-		it('should be able to add 400 sequencer concurrently', () => {
-			let ids = [];
-			for (let i = 0; i < 400; i++) {
-				const sequencer = new Sequencer();
-				if (ids.includes(sequencer.getID())) {
-					throw new Error(`id for item ${i} is already present in the list`);
-				} else {
-					ids.push(sequencer.getID());
-				}
+			for (const i in sequence) {
+				const letter = sequence[i];
+				expect(sequencer.update()({code: letter})).toEqual(compare.slice(- i - 1));
 			}
 		});
 
-		it('should work with dynamic keys', () => {
-			const sequencer = new Sequencer();
-			sequencer.listen();
-
-			// Trigger if two consecutive keys were repeated twice.
-			sequencer.dynamicKeys(() => {
-				const lastDuo = sequencer.getSequence().slice(-2);
-
-				if (lastDuo.length < 2) {
-					return null;
-				}
-
-				return [{fn: callback, sequence: [...lastDuo, ...lastDuo]}];
-			});
-
-			expect(callback).toBeCalledTimes(0);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'd'}));
-
-			expect(callback).toBeCalledTimes(1);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-
-			expect(callback).toBeCalledTimes(2);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'e'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'f'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'e'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'h'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 't'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 't'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 't'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 't'}));
-
-			expect(callback).toBeCalledTimes(3);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-
-			expect(callback).toBeCalledTimes(3);
-		});
-
-		it('should reject when attaching the listener multiple times', () => {
-			const sequencer = new Sequencer();
-			sequencer.listen();
-
-			expect(() => {
-				sequencer.listen()
-			}).toThrow(LOGS.ERROR_ALREADYMOUNTED);
-
-			expect(() => {
-				sequencer.mount()
-			}).toThrow(LOGS.ERROR_ALREADYMOUNTED);
-		});
-
-		it('should reject when adding listener on non attached sequencer', () => {
+		it('should remove keys', () => {
 			const sequencer = new Sequencer();
 
-			expect(() => {
-				sequencer.register(['a', 'b'], callback)
-			}).toThrow(LOGS.ERROR_NOTMOUNTEDYET);
+			sequencer.update()({code: 'a'});
+			sequencer.update()({code: 'b'});
+			let keys = sequencer.update()({code: 'c'});
 
-			expect(() => {
-				sequencer.dynamicKeys(() => null)
-			}).toThrow(LOGS.ERROR_NOTMOUNTEDYET);
+			expect(keys.join('')).toEqual('cba');
+
+			keys = sequencer.remove({code: 'd'});
+			expect(keys.join('')).toEqual('cba');
+
+			keys = sequencer.remove({code: 'b'});
+			expect(keys.join('')).toEqual('ca');
+
+			keys = sequencer.remove({code: 'c'});
+			expect(keys.join('')).toEqual('a');
+
+			keys = sequencer.remove({code: 'a'});
+			expect(keys.join('')).toEqual('');
+
+			keys = sequencer.remove({code: 'a'});
+			expect(keys.join('')).toEqual('');
 		});
 
-		it('should timeup correctly', async () => {
-			const sequencer = new Sequencer(50);
-			sequencer.listen();
+		it('should clean every keys', () => {
+			const sequencer = new Sequencer();
 
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keyup'));
-			expect(sequencer.getSequence()).toEqual(['a']);
+			sequencer.update()({code: 'a'});
+			sequencer.update()({code: 'b'});
+			let keys = sequencer.update()({code: 'c'});
 
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keyup'));
-			expect(sequencer.getSequence()).toEqual(['a', 'a']);
+			expect(keys.join('')).toEqual('cba');
 
-			await new Promise(resolve => setTimeout(resolve, 60));
-			expect(sequencer.getSequence()).toEqual([]);
+			sequencer.clear();
+			expect(sequencer.keys()).toEqual(['']);
+		});
 
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keyup'));
-			expect(sequencer.getSequence()).toEqual(['a']);
+		it('should remove keys passed lifespan', async () => {
+			const sequencer = new Sequencer();
+
+			let keys = sequencer.update({lifespan: 50})({code: 'a'});
+			expect(keys.join('')).toEqual('a');
 
 			await new Promise(resolve => setTimeout(resolve, 30));
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keyup'));
-			expect(sequencer.getSequence()).toEqual(['a', 'a']);
+			keys = sequencer.update({lifespan: 50})({code: 'b'});
+			expect(keys.join('')).toEqual('ba');
 
 			await new Promise(resolve => setTimeout(resolve, 30));
+			keys = sequencer.update({lifespan: 50})({code: 'c'});
+			expect(keys.join('')).toEqual('cb');
 
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keyup'));
-			expect(sequencer.getSequence()).toEqual(['a', 'a', 'a']);
-
-			await new Promise(resolve => setTimeout(resolve, 60));
-			expect(sequencer.getSequence()).toEqual([]);
+			await new Promise(resolve => setTimeout(resolve, 100));
+			expect(sequencer.keys()).toEqual(['']);
 		});
 
-		it('should output in debug mode', () => {
-			const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+		it('should sustain', async () => {
+			const sequencer = new Sequencer();
 
-			new Sequencer(400);
-			expect(consoleSpy).not.toHaveBeenCalled();
+			let keys = sequencer.update({lifespan: 50, sustain: true})({code: 'a'});
+			expect(keys.join('')).toEqual('a');
 
-			const testMount = new Sequencer(400, true);
-			expect(consoleSpy).toHaveBeenNthCalledWith(1, LOGS.INTRO(testMount.getID(), 400));
+			await new Promise(resolve => setTimeout(resolve, 30));
+			keys = sequencer.update({lifespan: 50, sustain: true})({code: 'b'});
+			expect(keys.join('')).toEqual('ba');
 
-			const sequencer = new Sequencer(400);
-			sequencer.setDebugMode(true);
+			await new Promise(resolve => setTimeout(resolve, 30));
+			keys = sequencer.update({lifespan: 50, sustain: true})({code: 'c'});
+			expect(keys.join('')).toEqual('cba');
 
-			function namedCallback() {
-				return null;
+			await new Promise(resolve => setTimeout(resolve, 100));
+			expect(sequencer.keys()).toEqual(['']);
+		});
+
+		it('should trigger combos', () => {
+			const sequencer = new Sequencer();
+
+			const copy = jest.fn();
+			const paste = jest.fn();
+
+			const ac = COMBOS.COPY[0];
+
+			const combos = [
+				{trigger: COMBOS.COPY, action: copy},
+				{trigger: COMBOS.PASTE, action: paste}
+			];
+
+			sequencer.update({lifespan: 20, sustain: true, combos})({code: ac});
+			sequencer.update({lifespan: 20, sustain: true, combos})({code: COMBOS.COPY[1]});
+			expect(copy).toHaveBeenCalledTimes(1);
+			expect(paste).not.toHaveBeenCalled();
+
+			sequencer.update({lifespan: 20, sustain: true, combos})({code: COMBOS.PASTE[1]});
+			expect(copy).toHaveBeenCalledTimes(1);
+			expect(paste).not.toHaveBeenCalled();
+
+			sequencer.update({lifespan: 20, sustain: true, combos})({code: ac});
+			sequencer.update({lifespan: 20, sustain: true, combos})({code: COMBOS.PASTE[1]});
+			expect(copy).toHaveBeenCalledTimes(1);
+			expect(paste).toHaveBeenCalledTimes(1);
+		});
+
+		it('should trigger intermediate action', () => {
+			const sequencer = new Sequencer();
+			const action = jest.fn();
+			const intermediateAction = jest.fn();
+
+			const combos = [{trigger: COMBOS.KONAMI_CODE, action, intermediateAction}];
+
+			for(let i = 0; i < (COMBOS.KONAMI_CODE.length - 1); i++) {
+				const code = COMBOS.KONAMI_CODE[i];
+				sequencer.update({lifespan: 20, sustain: true, combos})({code});
+				expect(action).not.toHaveBeenCalled();
+				expect(intermediateAction).toHaveBeenCalledTimes(i + 1);
 			}
 
-			function namedFallback() {
-				return null;
-			}
-
-			sequencer.listen();
-			sequencer.register(['a', 'b', 'c'], namedCallback, namedFallback);
-
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'a'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'b'}));
-			document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'c'}));
-
-			expect(consoleSpy).toHaveBeenNthCalledWith(2, LOGS.CURRENT_SEQUENCES(['a']));
-			expect(consoleSpy).toHaveBeenNthCalledWith(3, LOGS.RUNNING_FALLBACK({name: 'namedFallback'}));
-			expect(consoleSpy).toHaveBeenNthCalledWith(4, LOGS.CURRENT_SEQUENCES(['a', 'b']));
-			expect(consoleSpy).toHaveBeenNthCalledWith(5, LOGS.RUNNING_FALLBACK({name: 'namedFallback'}));
-			expect(consoleSpy).toHaveBeenNthCalledWith(6, LOGS.CURRENT_SEQUENCES(['a', 'b', 'c']));
-			expect(consoleSpy).toHaveBeenNthCalledWith(7, LOGS.RUNNING_CALLBACK({name: 'namedCallback'}));
-
-			consoleSpy.mockRestore();
+			sequencer.update({lifespan: 20, sustain: true, combos})({code: COMBOS.KONAMI_CODE[COMBOS.KONAMI_CODE.length - 1]});
+			expect(action).toHaveBeenCalledTimes(1);
+			expect(intermediateAction).toHaveBeenCalledTimes(COMBOS.KONAMI_CODE.length - 1);
 		});
 	}
 );

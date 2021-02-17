@@ -147,7 +147,7 @@ const getSelectionRange = (element, ignore) => {
 		startOffset = range.startOffset;
 		endOffset = range.endOffset;
 
-		// Creating a copy of range allows to compute it while not interfering with the actual selection. We need such
+		// Creating a copy of range allows to compute it whithout interfering with the actual selection. We need such
 		// alterations in the getComplexOffset() method.
 		const preCaretRange = range.cloneRange();
 

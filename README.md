@@ -1,5 +1,11 @@
 # Tachyon
 
+Helpers to be used within a frontend framework.
+
+```
+yarn add @anovel/tachyon
+```
+
 <div align="center">
     <a href="https://www.npmjs.com/package/@anovel/tachyon">
         <img alt="npm (scoped)" src="https://img.shields.io/npm/v/@anovel/tachyon?style=for-the-badge">
@@ -20,340 +26,239 @@
 
 A light framework for easier and advanced DOM manipulations.
 
-> The following functions require a client DOM environment to run. They are meant
-> to work within client frameworks such as React.
-
-- [Keys](#keys)
-    - [Sequencer Initialization](#sequencer-initialization)
-    - [Register sequences](#register-sequences)
-    - [Special methods](#special-methods)
-        - [getSequence](#getsequence)
-        - [getValidationProgress](#getvalidationprogress)
-        - [setDebugMode](#setdebugmode)
-    - [Default key combos](#default-key-combos)
-- [Os](#os)
-- [Selection](#selection)
-    - [getRange](#getrange)
-    - [setRange](#setrange)
-    - [Range ignore](#range-ignore)
+- [OS](#os)
 - [Url](#url)
-    - [goTo](#goto)
-    - [isActive](#isactive)
-- [License](#license)
+  - [goTo](#goto)
+  - [isActive](#isactive)
+  - [buildUrl](#buildurl)
+- [Keys](#keys)
+  - [Sequencer.update](#sequencerupdate)
+  - [Sequencer.remove](#sequencerremove)
+  - [Sequencer.clear](#sequencerclear)
+  - [Sequencer.keys](#sequencerkeys)
 
-## Keys
+# OS
 
-An advanced eventListener to easily watch for complex key combos.
+Get the current running OS.
 
-A simple use case is given below.
-
-```jsx
-import React from 'react';
-import {Sequencer} from '@anovel/tachyon';
-import css from './MyComponent.module.css';
-
-class MyComponent extends React.Component {
-  state = {combo: false};
-
-  sequencer = new Sequencer();
-
-  ref = React.createRef();
-
-  validateCombo = () => {
-    this.setState({combo: true});
-  };
-
-  componentDidMount() {
-    this.sequencer.listen(this.ref.current);
-    this.sequencer.register(['a', 'b', 'c'], this.validateCombo);
-  }
-
-  render() {
-    return(
-      <div ref={this.ref} className={this.state.combo ? css.pressed : ''}>Press a, b and c</div>
-    );
-  }
-}
-```
-
-### Sequencer Initialization
-
-A Sequencer is a custom class that will record a list of pressed keys within the DOM
-element it is attached to. I can take 2 optional parameters.
-
-```javascript
-const sequencer = new Sequencer(400, false);
-```
-
-| Parameter | Type | Description |
-| :--- | :--- | :--- |
-| Speed | number | The maximum time, in milliseconds, between 2 key press to validate the combo. |
-| Debug | boolean | Debug mode will print information about current sequences and actions in the web console. |
-
-Once your sequencer is initialized, you need to attach it an element to listen to.
-
-```javascript
-// element is a DOM element.
-sequencer.listen(element);
-```
-
-> Not adding any element or putting `null` value will attach the listener to the whole
-> document.
-
-### Register sequences
-
-Now your sequencer is active, you have to attach listeners, in a similar fashion the
-default `.addEventListener` works.
-
-```javascript
-sequencer.register(sequence, callback, fallback);
-```
-
-> register will fail if `sequencer.listen()` was not called before.
-
-| Parameter | Type | Description |
-| :--- | :--- | :--- |
-| sequence | string[] | The sequence of key to trigger the callback. Keys are referring to the event attribute `e.key`. |
-| callback | function: InputEvent | The callback to execute when sequence is validated. |
-| fallback | function: InputEvent | An optional function to run each time a key is pressed but the combo is not validated. |
-
-### Special methods
-
-#### getSequence
-
-Returns the latest recorded sequence of keys.
-
-```javascript
-const currentSequence = sequencer.getSequence();
-```
-
-#### getValidationProgress
-
-Get the progression of a given sequence :
-
-```javascript
-// If getSequence() ends with ['a', 'b', 'c'], returns 3
-// If getSequence() ends with ['a', 'b'], returns 2
-// If getSequence() ends with ['a'], returns 1
-// If getSequence() doesn't end with any of the sequence prefixes, returns 0
-const progress = sequencer.getValidationProgress(['a', 'b', 'c']);
-```
-
-#### setDebugMode
-
-Set debug mode to true or false dynamically.
-
-```javascript
-// Activate debug mode if not.
-sequencer.setDebugMode(true);
-```
-
-### Default key combos
-
-Keys provides some default keys sequences to use within your listeners. You can use
-them via `keys.COMBOS`.
-
-| Combo Name | Keys |
-| :--- | :--- |
-| UNDO | Ctrl+z (Cmd+z for macOS) |
-| REDO | Ctrl+Alt+z (Cmd+Alt+z for macOS) |
-| SELECTALL | Ctrl+a (Cmd+a for macOS) |
-| COPY | Ctrl+c (Cmd+c for macOS) |
-| CUT | Ctrl+x (Cmd+x for macOS) |
-| PASTE | Ctrl+v (Cmd+v for macOS) |
-| KONAMI_CODE | up up down down left right left right b a |
-
-## Os
-
-Return information about the client OS.
-
-```javascript
+```js
 import {getOS, literals} from '@anovel/tachyon';
 
-const currentOS = getOS();
+const myOS = getOS();
 
-switch(currentOS) {
-case literals.OS.WINDOWS:
-
-case literals.OS.MACOS:
-
-case literals.OS.LINUX:
-
-case literals.OS.ANDROID:
-
-case literals.OS.IOS:
-
-case literals.OS.OTHER:
-
+if (myOS === literals.OS.MACOS) {
+	// Do something.
 }
 ```
 
-## Selection
+`getOS` may return any of the following strings (all can be found in `literals.OS`):
 
-Tools to easily select text inside complex div structures.
-
-### getRange
-
-```javascript
-import {getRange} from '@anovel/tachyon';
-
-const currentSelection = getRange(element);
-```
-
-Returns the current caret range within a given element. The returned
-object is consisting of 3 keys :
-
-```json
-{
-  "absolute": {
-    "start": 0,
-    "end": 10,
-  },
-  "start": {
-    "container": "someDiv",
-    "offset": 0
-  },
-  "end": {
-    "container": "someDiv",
-    "offset": 4
-  }
-}
-```
-
-Start and End are provided by the default selection handlers. DOM cannot
-handle selection outside a textNode. Given the following HTML structure:
-
-```html
-<div>Lorem ipsum dolor <span>sit amet</span>, consectetur adipiscing elit.</div>
-```
-
-Now let's imagine an end user selected characters from offset 6 to 21:
-
-```html
-ipsum dolor <span>sit
-```
-
-If you run `window.getSelection().getRangeAt(0)`, you'll get a result
-similar to this one :
-
-```json
-{
-  "startContainer": "YourDiv",
-  "endContainer": "YourSpan",
-  "startOffset": 6,
-  "endOffset": 3,
-}
-```
-
-This is because your selection starts in the container `<div>` at offset 6,
-and ends in the `<span>` at offset 3. Those are the information returned within
-`start` and `end` keys.
-
-Now, for better convenience and readability, we'd like to know that offset 3
-in `<span>` is equivalent to the offset 21 in `<div>`, so we know in our text,
-independently from DOM partition, the caret goes from character 6 to 21.
-
-This is the goal of the returned `absolute` key. Absolute position will ignore
-the DOM partitioning within our parent element to return the actual positions
-of the caret bounds, as they appear to human eyes.
-
-### setRange
-
-```javascript
-import {setRange} from '@anovel/tachyon';
-
-// Returns {start: 6, end: 21} if both bounds are in limits,
-// {start: x, end: y} if one or both limit was overflowing or
-// {start: -1, end: -1} if content is empty.
-const currentSelection = setRange(element, 6, 21);
-```
-
-Set selection range within an element. The advantages of this method, compared
-to default DOM handlers, are:
-- easier declaration
-- doesn't crash if off limits (will just stop if their is no more characters to select)
-- is compatible with element children DOM hierarchy (you don't have to select a direct textNode)
-
-`setRange` returns an object with the actual absolute bounds that were set (which may differ
-from parameters if one or both were off limits).
-
-### Range ignore
-
-Both setRange and getRange take an optional array of string DOM selectors. This
-array tells our handlers to ignore some elements when computing selection.
-
-For example, applying:
-
-```javascript
-setRange(element, 6, 21, ['span']);
-```
-
-to:
-
-```html
-<div>Lorem ipsum dolor <span>sit amet</span>, consectetur adipiscing elit.</div>
-```
-
-will select:
-
-```html
-ipsum dolor <span>sit amet</span>, c
-```
-
-since it will not count what is between spans (although it will select it since
-selection cannot be cut half).
+| Key     | Value       |
+| :---    | :---        |
+| WINDOWS | `'Windows'` |
+| LINUX   | `'Linux'`   |
+| MACOS   | `'macOS'`   |
+| IOS     | `'iOS'`     |
+| ANDROID | `'Android'` |
+| OTHER   | `'unknown'` |
 
 # Url
 
 ## goTo
 
-Navigate to the page passed as parameter.
+Extra implementation of url navigator with options.
 
-```javascript
+```jsx
 import {goTo} from '@anovel/tachyon';
-import {history} from 'path/to/history/handler';
 
-// Navigates to the url '/foo/bar'
-goTo('/foo/bar', {history});
+// Basic example
+goTo('/foo/bar', history) // opens '/foo/bar' in current tab
+
+// With flags
+goTo('/foo/bar', history, {openOutside: true}) // opens '/foo/bar' in a new browser tab
+goTo('/foo/bar', history, {skip: true}) // opens '/foo/bar' in current tab, and remove previous location from history
+
+// Using url build options
+goTo('/foo/:param', history, {params: {param: 'bar'}}) // opens '/foo/bar'
+goTo('/foo/bar', history, {query: {uid: 'user_id'}}) // opens '/foo/bar?uid=user_id'
+goTo('/foo/bar', history, {anchor: 'section2'}) // opens '/foo/bar#section2'
 ```
 
-You can pass optional configuration arguments:
+**Arguments**
 
-```javascript
-import {goTo} from '@anovel/tachyon';
-import {history} from 'path/to/history/handler';
+| Argument    | Type    | Required | Description                                |
+| :---        | :---    | :---     | :---                                       |
+| destination | string  | **true** | The url to open.                           |
+| history     | History | **true** | The history manager. **[1](#goto-args-1)** |
+| options     | Object  | -        | Options (see below table).                 |
 
-// Navigates to the url '/foo/bar' in another tab.
-goTo('/foo/bar', {history, openOutside: true});
-```
+<span id="goto-args-1"><b>(1)</b></span> You can read more about routers at [this link](https://reactrouter.com/web/api/history).
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| urlParams | object | Populates the url with given parameters.<br/>`goTo('/:foo', {urlParams: {foo: 'bar'}}) -> opens /bar` |
-| urlQuery | object | Generates query string.<br/>`goTo('/home', {urlQuery: {foo: 'bar'}}) -> opens /home?foo=bar` |
-| openOutside | boolean | Opens url in a new window. |
-| skip | boolean | Replace last history entry. |
-| history | object | React history handler. |
+**Options**
+
+Additional parameters are available to perform your navigation.
+
+| Key         | Type                    | Description                                                                                                                                         |
+| :---        | :---                    | :---                                                                                                                                                |
+| params      | Object.<string, string> | A map of <string, string>. Each key/value pair corresponds to an url parameter and the value to interpolate it with.                                |
+| query       | Object.<string, any>    | A map that represents query parameters. Query parameters are appended to the url after the `?` character.                                           |
+| anchor      | string                  | Load url to a specific anchor.                                                                                                                      |
+| openOutside | boolean                 | If true, open the url in a new browser tab.                                                                                                         |
+| skip        | boolean                 | If true, replace the current entry in history with the new url. Hitting return from there will go back to previous page instead of the current one. |
 
 ## isActive
 
-Check if the current url matches a route.
+Check if the current route is active.
 
-```javascript
+```jsx
 import {isActive} from '@anovel/tachyon';
 
-const active = isActive('/hello/world');
-// /hello/world     -> true
-// /hello/world/42  -> true
-// /hello           -> false
+// Retrieve your current location from the most convenient way
+// (window.location or the react-router location property).
+let location;
+
+// The following examples will assume that current location 
+// pathname is '/foo/bar/qux'.
+
+console.log(isActive('/foo/bar', location)); // true
+console.log(isActive('/foo/qux', location)); // false
+console.log(isActive('/foo/bar', location, true)); // false
+
+// You can also check multiple routes at once by passing an array as first argument.
+console.log(isActive(['/foo/qux', '/foo/bar'], location)); // true
 ```
 
-You can pass an optional configuration argument:
+> Trailing slashes are ignored, so `/foo/bar` and `/foo/bar/` will be treated the same, weather in target or 
+> currentLocation. Also, if leading slash is missing, it will be added automatically.
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| exact | boolean | Only returns if both url matches exactly (ignoring queryParams). |
-| location | object | Custom location object with pathname and other location data. It uses `window.location` by default. |
+**Arguments**
+
+| Argument        | Type                | Required | Description                                                                                |
+| :---            | :---                | :---     | :---                                                                                       |
+| target          | string<br/>[]string | **true** | The target route(s) to verify. Returns true if the current location matches any of them.   |
+| currentLocation | string              | **true** | The current location. A valid location is any Object with a non empty pathname string key. |
+| exact           | boolean             | -        | Only match if current location correspond exactly to a target.                             |
+
+## buildUrl
+
+Build an url from a template string and parameters.
+
+```jsx
+import {buildUrl} from '@anovel/tachyon';
+
+buildUrl('/foo'); // '/foo'
+buildUrl('/foo/:param1', {param1: 'bar'}); // '/foo/bar'
+buildUrl('/foo/:param1', {param1: 'bar'}, {uid: 'user_uid'}); // '/foo/bar?uid=user_id'
+buildUrl('/search', null, {genre: 'books', priceMax: 10}); // '/search?genre=books&priceMax=10'
+```
+
+**Arguments**
+
+| Argument | Type                    | Required | Description                                                                                                          |
+| :---     | :---                    | :---     | :---                                                                                                                 |
+| url      | string                  | **true** | The url template string.                                                                                             |
+| params   | Object.<string, string> | **true** | A map of <string, string>. Each key/value pair corresponds to an url parameter and the value to interpolate it with. |
+| query    | Object.<string, any>    | **true** | A map that represents query parameters. Query parameters are appended to the url after the `?` character.            |
+| anchor   | string                  | **true** | Load url to a specific anchor.                                                                                       |
+
+# Keys
+
+A sequencer allows you to listen for keypress on any html element and trigger actions whenever a combo is hit.
+
+```jsx
+import React from 'react';
+import {Sequencer, literals} from '@anovel/tachyon';
+import css from 'myStyle.module.css';
+
+// Example with a copy/paste mock implementation.
+const MyComponent = () => {
+	const sequencer = new Sequencer();
+	
+	const combos = [
+      {trigger: literals.COMBOS.COPY, action: () => console.log('I am copied!')},
+      {trigger: literals.COMBOS.PASTE, action: () => console.log('I am paste!')}
+    ];
+	
+	return (
+		<div className={css.container}>
+          <div
+            onKeyDown={sequencer.update({combos})}
+            onKeyUp={sequencer.remove}
+          >Copy me (CTRL + C) or Paste me (CTRL + V)</div>
+        </div>
+    );
+};
+```
+
+The Sequencer constructor does not take any arguments. Instead, every parameters are passed on the go through its
+methods, which allows for highly dynamic behavior.
+
+Sequencer ships with 4 public methods.
+
+- [Sequencer.update](#sequencerupdate)
+- [Sequencer.remove](#sequencerremove)
+- [Sequencer.clear](#sequencerclear)
+- [Sequencer.keys](#sequencerkeys)
+
+## Sequencer.update
+
+Update sequence and return the updated list of pressed keys in the sequence. Return the current pressed keys array.
+
+```jsx
+function handler(e) {
+	const keys = sequencer.update(options)(e);
+}
+```
+
+**Arguments**
+
+| Argument | Type    | Required | Description                                 |
+| :---     | :---    | :---     | :---                                        |
+| options  | Object  | -        | Arguments to control key sequence behavior. |
+
+**Options**
+
+| Key      | Type     | Description                                                                                                                                                                            |
+| :---     | :---     | :---                                                                                                                                                                                   |
+| lifespan | number   | Automatically removes the key from the chain passed a certain amount of time (in milliseconds). If not set, key should be removed manually with the [remove](#sequencerremove) method. |
+| sustain  | boolean  | If set to true, a new entry will automatically reset all timers for each key in the sequence. If a key was not timed, it will initialize a new timer on it.                            |
+| combos   | []Object | List of actions to take if a valid sequence of keys is matched.                                                                                                                        |
+
+**Combo**
+
+| Key                | Required | Type     | Description                                                                                                                                     |
+| :---               | :---     | :---     | :---                                                                                                                                            |
+| trigger            | **true** | []string | The sequence of keys to trigger an action. Each element must correspond to a valid `keycode` attribute (of a KeyboardEvent).                    |
+| action             | **true** | function | Run this action (with no arguments) when the current sequences array ends with the keys in `trigger`.                                           |
+| intermediateAction | -        | function | Run this function when the current sequence partially matches `trigger`. Takes the number of triggered keys as an argument.                     |
+| alwaysTrigger      | -        | boolean  | If true and `intermediateAction` is set, runs intermediateAction on any keypress when `action` is not triggered, even if trigger has 0 matches. |
+
+## Sequencer.remove
+
+Remove all occurences of a keycode from the sequence. Takes a KeyboardEvent as argument. Return the current pressed 
+keys array.
+
+```jsx
+function handler(e) {
+	const keys = sequencer.remove(e);
+}
+```
+
+## Sequencer.clear
+
+Empty (reset) the current key chain.
+
+```jsx
+sequencer.clear();
+```
+
+## Sequencer.keys
+
+Return the current pressed keys array.
+
+```jsx
+const keys = sequencer.keys();
+```
 
 # License
 

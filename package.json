@@ -1,6 +1,6 @@
 {
   "name": "@anovel/tachyon",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "private": false,
   "scripts": {
     "build:test": "NODE_ENV=test rollup -c && NODE_ENV=",
@@ -27,25 +27,22 @@
   "description": "A light framework for easier and advanced DOM manipulations.",
   "main": "lib/index.js",
   "devDependencies": {
-    "@babel/cli": "^7.0.0",
-    "@babel/core": "^7.0.0",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-transform-classes": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.11.5",
-    "@babel/preset-env": "^7.11.5",
-    "@jest/globals": "^26.5.2",
-    "babel-jest": "^26.5.2",
-    "codecov": "^3.8.0",
+    "@babel/core": "^7.12.16",
+    "@babel/plugin-proposal-class-properties": "^7.12.13",
+    "@babel/plugin-transform-classes": "^7.12.13",
+    "@babel/plugin-transform-runtime": "^7.12.15",
+    "@babel/preset-env": "^7.12.16",
+    "@jest/globals": "^26.6.2",
+    "codecov": "^3.8.1",
     "dotenv": "^8.2.0",
-    "jest": "^26.5.2",
+    "jest": "^26.6.3",
     "jest-puppeteer": "^4.4.0",
     "jsdom": "^16.4.0",
-    "puppeteer": "^5.3.1",
-    "rollup": "^2.29.0",
+    "puppeteer": "^7.1.0",
+    "rollup": "^2.39.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-node-resolve": "^5.2.0"
   },
   "repository": {
     "type": "git",
@@ -55,10 +52,20 @@
   "license": "MIT",
   "keywords": [
     "DOM",
+    "navigation",
     "React"
   ],
   "bugs": {
     "url": "https://github.com/a-novel/tachyon/issues"
   },
-  "homepage": "https://github.com/a-novel/tachyon#readme"
+  "homepage": "https://github.com/a-novel/tachyon#readme",
+  "dependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-flowtype": "^5.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0"
+  }
 }

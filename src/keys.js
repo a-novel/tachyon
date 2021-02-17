@@ -1,15 +1,16 @@
-// Created and maintained by Kushuh.
-// https://github.com/Kushuh - kuzanisu@gmail.com
+/**
+ * @author Team Anovel {@link https://github.com/a-novel}
+ * @module keys
+ * */
 
 import {getOS, OS} from './os';
 
-const os = getOS();
-
+/* c8 ignore next 5 */
 /**
  * Ctrl for most OS, Cmd for macOS.
- * @type {string}
+ * @type {}
  */
-const actionKey = os === OS.MACOS ? 'Meta' : 'Control';
+const actionKey = () => (getOS() === OS.MACOS) ? 'Meta' : 'Control';
 
 /**
  * Common controls sequences.
@@ -25,313 +26,423 @@ const actionKey = os === OS.MACOS ? 'Meta' : 'Control';
  * }}
  */
 const COMBOS = {
-	UNDO: [actionKey, 'Z'],
-	REDO: [actionKey, 'Shift', 'Z'],
-	SELECTALL: [actionKey, 'A'],
-	COPY: [actionKey, 'C'],
-	CUT: [actionKey, 'X'],
-	PASTE: [actionKey, 'V'],
+	UNDO: [actionKey(), 'Z'],
+	REDO: [actionKey(), 'Shift', 'Z'],
+	SELECTALL: [actionKey(), 'A'],
+	COPY: [actionKey(), 'C'],
+	CUT: [actionKey(), 'X'],
+	PASTE: [actionKey(), 'V'],
 	KONAMI_CODE: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
 };
 
 /**
- * Attach a unique event to each instance of sequencer.
+ * @callback IntermediateAction
+ * @param {Number} completionIndex
+ * */
+
+/**
+ * @typedef {{
+ *   trigger: Array.<string>,
+ *   action: function,
+ *   [intermediateAction]: {IntermediateAction},
+ *   [alwaysTrigger]: Boolean,
+ * }} module:keys.Configuration
+ * */
+
+/**
+ * Compares a key chain against a sequence action configuration.
  *
- * @param {number} id
- * @return {string}
- * @override
- */
-const event = id => `KeySequenceUpdated_${id}`;
+ * @param {String} snapshot
+ * @param {module:keys.Configuration} configuration
+ *
+ * @return Promise<void>
+ * */
+const compareSequenceList = async (snapshot, configuration) => {
+	const {
+		/** @type Array.<string> */ trigger,
+		/** @type function */ action,
+		/** @type {IntermediateAction} */ intermediateAction,
+		/** @type Boolean */ alwaysTrigger
+	} = configuration;
 
-window.tachyonDATA = {sequencerID: 1};
+	let matches = trigger.length;
 
-const LOGS = {
-	INTRO: (id, timeout) => `new sequencer mounted:\n\tID: ${id}\n\ttimeout: ${timeout}`,
-	CURRENT_SEQUENCES: list => `current sequence: ${JSON.stringify(list)}`,
-	RUNNING_CALLBACK: fn => `running callback ${fn.name || 'anonymous'}`,
-	RUNNING_FALLBACK: fn => `running fallback ${fn.name || 'anonymous'}`,
-	ERROR_ALREADYMOUNTED: 'this sequencer has already been attached to an element',
-	ERROR_NOTMOUNTEDYET: 'sequencer is not yet initialized, you cannot attach listeners to it'
+	while (!snapshot.endsWith(trigger.slice(0, matches).join(' '))) {
+		matches--;
+	}
+
+	// All keys where matched.
+	if (matches === trigger.length) {
+		action && action();
+	} else if (alwaysTrigger || matches > 0) {
+		intermediateAction && intermediateAction(matches);
+	}
 };
 
 /**
- * A Sequence consist of a callback and a list of keys to trigger it.
+ * A sequence identifies a key press at a certain timestamp. It is a workaround implementation of C++ chained lists,
+ * to optimize both memory usage and access time (it avoids manipulating a whole array on each action, and lets a
+ * Sequence delete itself more quickly).
  *
- * @typedef {{fn: function, sequences: string[]}} Sequence
- * @override
- */
-/**
- * Extend eventListener concept on a serie of keys.
- *
- * @version 1.0.0
- * @author [Kushuh](https://github.com/Kushuh)
- */
-export default class Sequencer {
+ * @class Sequence
+ * @alias keys.Sequence
+ * */
+class Sequence {
 	/**
-	 * @param {number=} timeout
-	 * @param {boolean=} debug
-	 * @constructs Sequencer
-	 */
-	constructor(timeout, debug) {
-		this.#debug = debug;
-		this.#timeout = timeout || 400;
-		this.#id = window.tachyonDATA.sequencerID;
-		window.tachyonDATA.sequencerID++;
-
-		if (debug) {
-			console.log(LOGS.INTRO(this.#id, this.#timeout));
-		}
+	 * Creates a new Sequence.
+	 *
+	 * @param {String} key - the associated keycode
+	 * @param {keys.Sequence | null} [previous] - an optional reference to the previous sequence in the chain
+	 * @param {keys.Sequence | keys.Sequencer | null} [next] - an optional reference to the next sequence in the chain
+	 * @param {Boolean} [lock] - indicates this sequence cannot alter the sequence chain (usually when it represents a copy of another Sequence)
+	 * */
+	constructor(key, previous, next, lock = false) {
+		this.#key = key;
+		this.#previous = previous;
+		this.#next = next;
+		this.#lock = lock;
 	}
 
 	/**
-	 * Debug mode allow to print dynamically recorded sequence.
-	 *
-	 * @type {boolean}
-	 * @private
-	 */
-	#debug;
+	 * @type {String}
+	 * @description The keycode of the key that was pressed.
+	 * */
+	#key;
 
 	/**
-	 * Unique id for this sequencer.
-	 *
-	 * @type {number}
-	 * @private
-	 */
-	#id;
+	 * @type {keys.Sequence}
+	 * @description An optional reference to the previous instance within the chain.
+	 * */
+	#previous;
 
 	/**
-	 * Hold the current sequences of pressed keys.
-	 *
-	 * @type {string[]}
-	 * @private
-	 */
-	#sequences = [];
+	 * @type {keys.Sequence}
+	 * @description An optional reference to the next instance within the chain.
+	 * */
+	#next;
 
 	/**
-	 * HTML Element to attach listeners to. By default it is document global.
-	 *
-	 * @type {Node}
-	 * @private
-	 */
-	#el;
+	 * @type {Boolean}
+	 * @description Prevent this instance from performing alterations to the chain.
+	 * */
+	#lock;
 
 	/**
-	 * Time to wait before removing a key from combo.
-	 *
-	 * @type {number}
-	 * @private
-	 */
-	#timeout;
+	 * @type {NodeJS.Timeout}
+	 * @description Handles class self destruction.
+	 * */
+	#timer;
 
 	/**
-	 * Private variable used to keep track of key position.
-	 *
-	 * @type {number}
-	 * @private
-	 */
-	#keyCount = 0;
+	 * @typedef {Error} LockedError
+	 * */
 
+	/* c8 ignore next 16 */
 	/**
-	 * Return general listeners for manual setup.
+	 * Prevent key chain mutations from locked instances.
 	 *
-	 * @param {Node=} el
-	 * @returns {{keyDown: function}}
-	 * @public
-	 * @override
-	 */
-	mount = el => {
-		if (this.#el != null) {
-			throw new Error(LOGS.ERROR_ALREADYMOUNTED);
-		}
-
-		// Assign element to the one passed in parameters
-		this.#el = el || document;
-
-		if (this.#debug) {
-			this.#el.addEventListener(event(this.#id), () => {
-				console.log(LOGS.CURRENT_SEQUENCES(this.#sequences));
-			});
-		}
-
-		// Return handlers in an object.
-		return {
-			/**
-			 * @param {KeyboardEvent} e
-			 */
-			keyDown: e => {
-				// Add a new key to current sequence and record its position.
-				this.#keyCount++;
-				this.#sequences.push(e.key);
-				const lockKC = this.#keyCount;
-
-				// Inform other listeners we updated the sequence.
-				this.#el.dispatchEvent(new CustomEvent(event(this.#id), {detail: e}));
-
-				// Remove listener declared as a variable so it can be removed.
-				/**
-				 * @param {KeyboardEvent} ee
-				 */
-				const removeKey = () => {
-					// Callback when the key needs to be removed from current sequence.
-					const terminateCallback = () => {
-						// Current offset of the key.
-						const offset = this.#keyCount - lockKC;
-
-						// Only if key is still present in the sequences array.
-						if (offset < this.#sequences.length) {
-							// Remove current key and every key before it.
-							this.#sequences = this.#sequences.slice(this.#sequences.length - offset + 1);
-						}
-
-						// Remove attached listeners for the current key.
-						this.#el.removeEventListener('keyup', removeKey, true);
-						this.#el.removeEventListener('keydown', resetCallback, true);
-					};
-
-					// Reset timer when another key is pressed fast enough, allowing for longer combos.
-					const resetCallback = () => {
-						clearTimeout(timer);
-						timer = setTimeout(terminateCallback, this.#timeout);
-					};
-
-					let timer = setTimeout(terminateCallback, this.#timeout);
-					this.#el.addEventListener('keydown', resetCallback, true);
-				}
-
-				// Add listener in a way it can be removed afterwards.
-				this.#el.addEventListener('keyup', removeKey, true);
+	 * @param {String} fn - calling method name.
+	 *
+	 * @throws {LockedError} - calling method not allowed in locked mode.
+	 * */
+	lock = fn => {
+		if (this.#lock) {
+			throw {
+				name: 'LockedError',
+				message: `Sequence.${fn} is forbidden on locked instance. This indicate an unsafe construction in your code ` +
+					'where you are trying to mutate a sequence list from a copy instance.'
 			}
 		}
 	};
 
 	/**
-	 * Automatic setup : add handlers and don't return them.
+	 * Destroy current instance in a defined duration. This timer may be reset by another call to itself.
 	 *
-	 * @param {Node=} el
-	 * @public
-	 * @override
-	 */
-	listen = el => {
-		if (this.#el != null) {
-			throw new Error(LOGS.ERROR_ALREADYMOUNTED);
-		}
+	 * @param {Number} duration - time in milliseconds before the current instance is destroyed (dereference).
+	 * @param {Boolean} [propagate] - retime every element in the chain
+	 *
+	 * @throws {LockedError}
+	 * */
+	time = (duration, propagate) => {
+		this.lock('time');
+		this.untime();
+		this.#timer = setTimeout(this.destruct, duration);
 
-		// Get handlers and set them.
-		const {keyDown} = this.mount(el);
-		this.#el.addEventListener('keydown', keyDown);
-
-		// So it can be used in ref={} declaration.
-		return el;
+		// Double check the previous element is set to avoid null reference errors.
+		if (propagate === true && this.#previous != null) this.#previous.time(duration, true);
 	};
 
 	/**
-	 * Allow dynamic key combos to be listened. Combos are accessed via a function that has access to the latest array
-	 * of {@link Sequence} to listen to, so they can change over setTime.
-	 *
-	 * @param {function: {sequence: Sequence[], fn: function, [fallback]: function}[]} accessor
-	 * @public
-	 * @override
-	 */
-	dynamicKeys = accessor => {
-		if (this.#el == null) {
-			throw new Error(LOGS.ERROR_NOTMOUNTEDYET);
-		}
-
-		this.#el.addEventListener(
-			event(this.#id),
-			e => {
-				(accessor() || []).forEach(registration => this.#checkSequence(e.detail, registration));
-			}
-		);
+	 * Cancels self-destruction timer.
+	 * */
+	untime = () => {
+		if (this.#timer) clearTimeout(this.#timer);
 	};
 
 	/**
-	 * Set debug mode programmatically.
+	 * Destruct (dereference) current instance.
 	 *
-	 * @param {boolean} mode
-	 * @override
-	 */
-	setDebugMode = mode => {
-		this.#debug = mode;
+	 * @throws {LockedError}
+	 * */
+	destruct = () => {
+		this.lock('destruct');
+		this.#next.clear();
 	};
 
 	/**
-	 * Return current sequence of pressed keys.
+	 * Dereference the previous instance in the chain.
 	 *
-	 * @return {string[]}
-	 * @override
-	 */
-	getSequence = () => this.#sequences;
-
-	/**
-	 * Return the number of validated keys within the sequence.
-	 *
-	 * @param {string[]} keys
-	 * @return number
-	 * @override
-	 */
-	getValidationProgress = keys => {
-		let i = keys.length;
-		while (keys.slice(0, i).join(';') !== this.#sequences.slice(-i).join(';') && i > 0) {
-			i--;
-		}
-
-		return i;
+	 * @throws {LockedError}
+	 * */
+	clear = () => {
+		this.lock('clear');
+		this.#previous = null;
 	};
 
 	/**
-	 * @return {number}
-	 */
-	getID = () => this.#id;
-
-	/**
-	 * Check if the current sequence matches a combo.
+	 * Re-assign previous sequence.
 	 *
-	 * @param {string} target
-	 * @param {string} current
-	 * @return {*|boolean}
-	 */
-	#isSequenceValidated = (target, current) => current.endsWith(target);
-
-	/**
-	 * @param {KeyboardEvent} e
-	 * @param {{fn: function, sequence: string[], fallback: function}} registration
-	 */
-	#checkSequence = (e, registration) => {
-		if (this.#isSequenceValidated(registration.sequence.join(' '), this.#sequences.join(' '))) {
-			if (this.#debug) {
-				console.log(LOGS.RUNNING_CALLBACK(registration.fn));
-			}
-
-			registration.fn(e);
-		} else if (registration.fallback) {
-			if (this.#debug) {
-				console.log(LOGS.RUNNING_FALLBACK(registration.fallback));
-			}
-
-			registration.fallback(e);
-		}
+	 * @param {keys.Sequence} sequence
+	 * @return {keys.Sequence} sequence
+	 * */
+	rebaseLeft = sequence => {
+		this.#previous = sequence;
+		return sequence;
 	};
 
 	/**
-	 * Add a new listener for a particular sequences. This listener is static and cannot be removed afterwards.
+	 * Re-assign next sequence.
 	 *
-	 * @param {function} fn
-	 * @param {string[]} sequence
-	 * @param {function=} fallback
-	 * @public
-	 * @override
+	 * @param {keys.Sequence} sequence
+	 * @return {keys.Sequence} sequence
+	 * */
+	rebaseRight = sequence => {
+		this.#next = sequence;
+		return sequence;
+	};
+
+	/**
+	 * Removes current sequence for chain. Same as {@link keys.Sequence.clear} with the extra handle of healing the chain
+	 * if not cut at edges.
+	 *
+	 * @throws {LockedError}
+	 * */
+	cut = () => {
+		this.lock('cut');
+
+		this.#previous && this.#previous.rebaseRight(this.#next);
+		this.#next.rebaseLeft(this.#previous);
+	};
+
+	/**
+	 * Returns the previous instance if any.
+	 *
+	 * @return {keys.Sequence | null} previousSequence
+	 * */
+	previous = () => this.#previous;
+
+	/**
+	 * Returns the next instance if any.
+	 *
+	 * @return {keys.Sequence | null} nextSequence
+	 * */
+	next = () => this.#next;
+
+	/**
+	 * Creates a locked copy of the current sequence.
+	 *
+	 * @return {keys.Sequence} sequence
+	 * */
+	copy = () => new Sequence(this.#key, this.#previous, this.#next, true);
+
+	/**
+	 * Returns current sequence keycode
+	 *
+	 * @return {String} key
+	 * */
+	key = () => this.#key;
+
+	/**
+	 * Returns the current key chain.
+	 *
+	 * @param {Array.<string>} [current]
+	 *
+	 * @return {Array.<string>} chain
 	 */
-	register = (sequence, fn, fallback) => {
-		if (this.#el == null) {
-			throw new Error(LOGS.ERROR_NOTMOUNTEDYET);
+	keyChain = current => {
+		const output = current || [];
+		output.push(this.#key);
+
+		return this.#previous != null ? this.#previous.keyChain(output) : output;
+	};
+
+	/**
+	 * Cut a Sequence based on a keycode.
+	 *
+	 * @param {String} target
+	 * */
+	cutTarget = target => {
+		if (this.#key === target) {
+			this.cut();
 		}
 
-		this.#el.addEventListener(
-			event(this.#id),
-			e => this.#checkSequence(e.detail, {fn, sequence, fallback})
-		);
+		if (this.#previous) {
+			this.#previous.cutTarget(target);
+		}
 	};
 }
 
-export {COMBOS, LOGS};
+/**
+ * Detect keys sequences and trigger according actions.
+ *
+ * @example
+ *
+ * // Logs each time the konami code was performed, at 2 different speed levels.
+ * const MyComponent = () => {
+ *   const sequencerSlow = new Sequencer();
+ *   const sequencerFast = new Sequencer();
+ *
+ *   const slowConfig = {lifespan: 1000, combos: [
+ *     trigger: COMBOS.KONAMI_CODE,
+ *     action: () => console.log('triggered slow !')
+ *   ]};
+ *
+ *   const fastConfig = {lifespan: 200, combos: [
+ *     trigger: COMBOS.KONAMI_CODE,
+ *     action: () => console.log('triggered fast !')
+ *   ]};
+ *
+ *   return (
+ *     <div className={css.container}>
+ *      <div
+ *       	tabIndex="0"
+ *       	className={css.button1}
+ *       	onKeyDown={sequencerSlow.update(slowConfig)}
+ *     	/>
+ *     	<div
+ *       	tabIndex="0"
+ *       	className={css.button2}
+ *       	onKeyDown={sequencerFast.update(fastConfig)}
+ *     	/>
+ *     </div>
+ *   );
+ * };
+ *
+ * @class Sequencer
+ * @alias keys.Sequencer
+ * */
+class Sequencer {
+	/**
+	 * @type {keys.Sequence}
+	 * @description Holds reference to the latest element of a {@link keys.Sequence} chain.
+	 * */
+	#sequence;
+
+	/**
+	 * @callback UpdateHandler
+	 *
+	 * @param {KeyboardEvent} e
+	 *
+	 * @return {Array.<String>} keyChain
+	 * */
+
+	/**
+	 * Append a {@link keys.Sequence} to the current chain. Returns the current keyChain list through a callback.
+	 *
+	 * @param {{
+	 *   [lifespan]: Number,
+	 *   [combos]: Array.<module:keys.Configuration>,
+	 *   [sustain]: Boolean
+	 * }} [config]
+	 *
+	 * @return {UpdateHandler}
+	 * */
+	update = config => e => {
+		const {lifespan, combos, sustain} = config || {};
+
+		this.#insert(e.code, lifespan, sustain);
+		if (combos && combos.length) this.#check(combos);
+
+		return this.keys();
+	};
+
+	/**
+	 * Removes a key from current chain.
+	 *
+	 * @param {KeyboardEvent} e
+	 *
+	 * @return {Array.<String>} keyChain
+	 * */
+	remove = e => {
+		// Do not perform combos check since a combo should only be targeted when the right keys were pressed in order.
+		this.#sequence != null && this.#sequence.cutTarget(e.code);
+		return this.keys();
+	};
+
+	/**
+	 * @private
+	 *
+	 * Insert a new sequence.
+	 *
+	 * @param {String} key
+	 * @param {Number} [lifespan]
+	 * @param {Boolean} [sustain]
+	 * */
+	#insert = (key, lifespan, sustain) => {
+		if (this.#sequence == null) {
+			this.#sequence = new Sequence(key, null, this);
+		} else {
+			this.#sequence = this.#sequence.rebaseRight(new Sequence(key, this.#sequence, this));
+		}
+
+		if (lifespan) {
+			this.#sequence.time(lifespan, sustain);
+		}
+	};
+
+	/**
+	 * @private
+	 *
+	 * Check if a combo is triggered.
+	 *
+	 * @param {Array.<module:keys.Configuration>} combos
+	 * */
+	#check = combos => {
+		const snapshot = this.#sequence.keyChain();
+		snapshot.reverse();
+
+		for (const combo of combos) {
+			compareSequenceList(snapshot.join(' '), combo).catch(console.error);
+		}
+	};
+
+	/**
+	 * Dereference current sequence to cancel chain.
+	 * */
+	clear = () => {
+		this.#sequence = null;
+	};
+
+	/**
+	 * Implementation of Sequence rebaseLeft for duck typing.
+	 *
+	 * @param {keys.Sequence} sequence
+	 * @return {keys.Sequence} sequence
+	 * */
+	rebaseLeft = sequence => {
+		this.#sequence = sequence;
+		return sequence;
+	};
+
+	/**
+	 * Return current key chain.
+	 *
+	 * @return {Array.<String>} keyChain
+	 * */
+	keys = () => {
+		return this.#sequence == null ? [''] : this.#sequence.keyChain();
+	};
+}
+
+export default Sequencer;
+export {COMBOS};
