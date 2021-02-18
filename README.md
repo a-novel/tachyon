@@ -36,6 +36,12 @@ A light framework for easier and advanced DOM manipulations.
   - [Sequencer.remove](#sequencerremove)
   - [Sequencer.clear](#sequencerclear)
   - [Sequencer.keys](#sequencerkeys)
+- [RecordsManager](#recordsmanager)
+  - [RecordsManager.undo](#recordsmanagerundo)
+  - [RecordsManager.redo](#recordsmanagerredo)
+  - [RecordsManager.push](#recordsmanagerpush)
+  - [RecordsManager.clearAll](#recordsmanagerclearall)
+  - [RecordsManager.content](#recordsmanagercontent)
 
 # OS
 
@@ -47,7 +53,7 @@ import {getOS, literals} from '@anovel/tachyon';
 const myOS = getOS();
 
 if (myOS === literals.OS.MACOS) {
-	// Do something.
+  // Do something.
 }
 ```
 
@@ -72,16 +78,16 @@ Extra implementation of url navigator with options.
 import {goTo} from '@anovel/tachyon';
 
 // Basic example
-goTo('/foo/bar', history) // opens '/foo/bar' in current tab
+goTo('/foo/bar', history); // opens '/foo/bar' in current tab
 
 // With flags
-goTo('/foo/bar', history, {openOutside: true}) // opens '/foo/bar' in a new browser tab
-goTo('/foo/bar', history, {skip: true}) // opens '/foo/bar' in current tab, and remove previous location from history
+goTo('/foo/bar', history, {openOutside: true}); // opens '/foo/bar' in a new browser tab
+goTo('/foo/bar', history, {skip: true}); // opens '/foo/bar' in current tab, and remove previous location from history
 
 // Using url build options
-goTo('/foo/:param', history, {params: {param: 'bar'}}) // opens '/foo/bar'
-goTo('/foo/bar', history, {query: {uid: 'user_id'}}) // opens '/foo/bar?uid=user_id'
-goTo('/foo/bar', history, {anchor: 'section2'}) // opens '/foo/bar#section2'
+goTo('/foo/:param', history, {params: {param: 'bar'}}); // opens '/foo/bar'
+goTo('/foo/bar', history, {query: {uid: 'user_id'}}); // opens '/foo/bar?uid=user_id'
+goTo('/foo/bar', history, {anchor: 'section2'}); // opens '/foo/bar#section2'
 ```
 
 **Arguments**
@@ -258,6 +264,303 @@ Return the current pressed keys array.
 
 ```jsx
 const keys = sequencer.keys();
+```
+
+# RecordsManager
+
+Manage a record history for textual inputs from pure javascript.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('');
+```
+
+**Constructor Arguments**
+
+| Argument   | Type    | Required | Description                                             |
+| :---       | :---    | :---     | :---                                                    |
+| baseString | string  | **true** | The base value for the string, prior to any alteration. |
+| options    | Object  | -        | See below section for more information.                 |
+
+**Constructor Options**
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+// Do not keep more than 100 records in history.
+const manager1 = new RecordsManager('', {maxLength: 100});
+
+const baseHistory = [{
+  newContent: 'hello',
+  caret: {start: 0, end: 0}, 
+  oldContent: '', 
+  timestamp: 1613609752021
+}];
+
+// Will start with value 'hello'.
+const manager2 = new RecordsManager('', {history: baseHistory});
+
+// Will start with value ''. This is a bad utilization since history record do not match the actual state.
+const manager3 = new RecordsManager('', {history: baseHistory, trustStartValue: true});
+
+// Good utilization of above case : the history records match the current state.
+const manager4 = new RecordsManager('hello world', {history: baseHistory, trustStartValue: true});
+```
+
+| Key             | Type                                                   | Description                                                                       |
+| :---            | :---                                                   | :---                                                                              |
+| history         | Array.<[StaticRecord](#records-manager-static-record)> | An array of previous history records to preload.                                  |
+| maxLength       | number                                                 | The maximum number of records to keep in history.                                 |
+| pack            | [PackOption](#records-manager-pack-option)             | Pack options allow to merge separate entries within history, based on some rules. |
+| trustStartValue | boolean                                                | If set to true, do not rebuild history from base value on loading.                |
+
+<span id="records-manager-static-record"><b>StaticRecord</b></span>
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const baseHistory = [{
+  newContent: 'hello ',
+  caret: {start: 0, end: 0}, 
+  oldContent: '', 
+  timestamp: 1613609752021
+}, {
+  newContent: 'world',
+  caret: {start: 6, end: 6},
+  oldContent: '',
+  timestamp: 1613609754927,
+  canceled: true
+}];
+
+// Will start with value 'hello '.
+const manager = new RecordsManager('', {history: baseHistory});
+
+console.log(manager.redo()); // hello world
+```
+
+| Key        | Type                            | Required | Description                                                                               |
+| :---       | :---                            | :---     | :---                                                                                      |
+| caret      | [Caret](#records-manager-caret) | **true** | The caret position before the alteration occured.                                         |
+| oldContent | string                          | **true** | The old string slice that was lost in the process.                                        |
+| newContent | string                          | **true** | The new string slice that was created in the process.                                     |
+| timestamp  | number                          | **true** | The time when the record was added to history (milliseconds).                             |
+| canceled   | boolean                         | -        | Indicate the record is not active yet in the current history (likely canceled with undo). |
+
+<span id="records-manager-pack-option"><b>PackOption</b></span>
+
+Define rules for merging records together when they are 'close enough'.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('', {pack: {maxSize: 2}});
+
+// Type 'hello world'
+manager.push({newContent: 'h', caret: {start: 0, end: 0}});
+manager.push({newContent: 'e', caret: {start: 1, end: 1}});
+manager.push({newContent: 'l', caret: {start: 2, end: 2}});
+manager.push({newContent: 'l', caret: {start: 3, end: 3}});
+manager.push({newContent: 'o', caret: {start: 4, end: 4}});
+manager.push({newContent: ' ', caret: {start: 5, end: 5}});
+manager.push({newContent: 'w', caret: {start: 6, end: 6}});
+manager.push({newContent: 'o', caret: {start: 7, end: 7}});
+manager.push({newContent: 'r', caret: {start: 8, end: 8}});
+manager.push({newContent: 'l', caret: {start: 9, end: 9}});
+manager.push({newContent: 'd', caret: {start: 10, end: 10}});
+
+console.log(manager.content()); // 'hello world'
+console.log(manager.undo()); // 'hello worl'
+console.log(manager.undo()); // 'hello wo'
+console.log(manager.undo()); // 'hello '
+console.log(manager.undo()); // 'hell'
+```
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+// Break on spaces (words).
+const manager = new RecordsManager('', {pack: {separators: [' ']}});
+
+// Type 'hello world'
+manager.push({newContent: 'h', caret: {start: 0, end: 0}});
+manager.push({newContent: 'e', caret: {start: 1, end: 1}});
+manager.push({newContent: 'l', caret: {start: 2, end: 2}});
+manager.push({newContent: 'l', caret: {start: 3, end: 3}});
+manager.push({newContent: 'o', caret: {start: 4, end: 4}});
+manager.push({newContent: ' ', caret: {start: 5, end: 5}});
+manager.push({newContent: 'w', caret: {start: 6, end: 6}});
+manager.push({newContent: 'o', caret: {start: 7, end: 7}});
+manager.push({newContent: 'r', caret: {start: 8, end: 8}});
+manager.push({newContent: 'l', caret: {start: 9, end: 9}});
+manager.push({newContent: 'd', caret: {start: 10, end: 10}});
+
+console.log(manager.content()); // 'hello world'
+console.log(manager.undo()); // 'hello '
+console.log(manager.undo()); // ''
+```
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+// Break after 600ms.
+const manager = new RecordsManager('', {pack: {timeout: 600}});
+
+// Type 'hello world'
+manager.push({newContent: 'h', caret: {start: 0, end: 0}});
+manager.push({newContent: 'e', caret: {start: 1, end: 1}});
+manager.push({newContent: 'l', caret: {start: 2, end: 2}});
+manager.push({newContent: 'l', caret: {start: 3, end: 3}});
+manager.push({newContent: 'o', caret: {start: 4, end: 4}});
+
+// wait 2s.
+await new Promise(resolve => setTimeout(resolve, 1000));
+
+manager.push({newContent: ' ', caret: {start: 5, end: 5}});
+manager.push({newContent: 'w', caret: {start: 6, end: 6}});
+manager.push({newContent: 'o', caret: {start: 7, end: 7}});
+manager.push({newContent: 'r', caret: {start: 8, end: 8}});
+manager.push({newContent: 'l', caret: {start: 9, end: 9}});
+manager.push({newContent: 'd', caret: {start: 10, end: 10}});
+
+console.log(manager.content()); // 'hello world'
+console.log(manager.undo()); // 'hello'
+```
+
+| Key        | Type           | Description                                                             |
+| :---       | :---           | :---                                                                    |
+| maxSize    | number         | The maximum size a record newContent can aggregate.                     |
+| separators | Array.<string> | String values that will split a record in 2 when occurring.             |
+| timeout    | number         | A maximal time interval in milliseconds between the 2 records to merge. |
+
+<span id="records-manager-caret"><b>Caret</b></span>
+
+| Key   | Type   | Required | Description                              |
+| :---  | :---   | :---     | :---                                     |
+| start | number | **true** | Caret start position (in 0 index basis). |
+| end   | number | **true** | Caret end position (in 0 index basis).   |
+
+## RecordsManager.undo
+
+Undo the last active entry. Returns the altered content.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('');
+
+const baseHistory = [{
+  newContent: 'hello ',
+  caret: {start: 0, end: 0},
+  oldContent: '',
+  timestamp: 1613609752021
+}, {
+  newContent: 'world',
+  caret: {start: 6, end: 6},
+  oldContent: '',
+  timestamp: 1613609754927
+}];
+
+// Will start with value 'hello world'.
+const manager = new RecordsManager('', {history: baseHistory});
+
+console.log(manager.undo()); // 'hello '
+```
+
+## RecordsManager.redo
+
+Undo the first inactive entry. Returns the altered content.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('');
+
+const baseHistory = [{
+  newContent: 'hello ',
+  caret: {start: 0, end: 0},
+  oldContent: '',
+  timestamp: 1613609752021
+}, {
+  newContent: 'world',
+  caret: {start: 6, end: 6},
+  oldContent: '',
+  timestamp: 1613609754927,
+  canceled: true
+}];
+
+// Will start with value 'hello '.
+const manager = new RecordsManager('', {history: baseHistory});
+
+console.log(manager.redo()); // 'hello world'
+```
+
+## RecordsManager.push
+
+Add a record to history. Returns the altered content.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('');
+
+const baseHistory = [{
+  newContent: 'hello ',
+  caret: {start: 0, end: 0},
+  oldContent: '',
+  timestamp: 1613609752021
+}];
+
+// Will start with value 'hello '.
+const manager = new RecordsManager('', {history: baseHistory});
+
+console.log(manager.push({newContent: 'world', caret: {start: 6, end: 6}})); // 'hello world'
+```
+
+## RecordsManager.clearAll
+
+Clear history. Cannot be recovered.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('');
+
+const baseHistory = [{
+  newContent: 'hello ',
+  caret: {start: 0, end: 0},
+  oldContent: '',
+  timestamp: 1613609752021
+}];
+
+// Will start with value 'hello '.
+const manager = new RecordsManager('', {history: baseHistory});
+
+manager.cleanAll();
+
+console.log(manager.undo()); // 'hello ' since last entry was lost and cannot be undone.
+```
+
+## RecordsManager.content
+
+Returns the current string content.
+
+```jsx
+import {RecordsManager} from '@anovel/tachyon';
+
+const manager = new RecordsManager('');
+
+const baseHistory = [{
+  newContent: 'hello ',
+  caret: {start: 0, end: 0},
+  oldContent: '',
+  timestamp: 1613609752021
+}];
+
+// Will start with value 'hello '.
+const manager = new RecordsManager('', {history: baseHistory});
+
+console.log(manager.content()); // 'hello '
 ```
 
 # License

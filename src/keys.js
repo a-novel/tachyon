@@ -4,11 +4,11 @@
  * */
 
 import {getOS, OS} from './os';
+import ChainList from './chainList';
 
-/* c8 ignore next 5 */
+/* c8 ignore next 4 */
 /**
  * Ctrl for most OS, Cmd for macOS.
- * @type {}
  */
 const actionKey = () => (getOS() === OS.MACOS) ? 'Meta' : 'Control';
 
@@ -87,7 +87,7 @@ const compareSequenceList = async (snapshot, configuration) => {
  * @class Sequence
  * @alias keys.Sequence
  * */
-class Sequence {
+class Sequence extends ChainList {
 	/**
 	 * Creates a new Sequence.
 	 *
@@ -96,11 +96,9 @@ class Sequence {
 	 * @param {keys.Sequence | keys.Sequencer | null} [next] - an optional reference to the next sequence in the chain
 	 * @param {Boolean} [lock] - indicates this sequence cannot alter the sequence chain (usually when it represents a copy of another Sequence)
 	 * */
-	constructor(key, previous, next, lock = false) {
+	constructor(key, previous, next, lock) {
+		super(previous, next, lock);
 		this.#key = key;
-		this.#previous = previous;
-		this.#next = next;
-		this.#lock = lock;
 	}
 
 	/**
@@ -108,24 +106,6 @@ class Sequence {
 	 * @description The keycode of the key that was pressed.
 	 * */
 	#key;
-
-	/**
-	 * @type {keys.Sequence}
-	 * @description An optional reference to the previous instance within the chain.
-	 * */
-	#previous;
-
-	/**
-	 * @type {keys.Sequence}
-	 * @description An optional reference to the next instance within the chain.
-	 * */
-	#next;
-
-	/**
-	 * @type {Boolean}
-	 * @description Prevent this instance from performing alterations to the chain.
-	 * */
-	#lock;
 
 	/**
 	 * @type {NodeJS.Timeout}
@@ -137,24 +117,6 @@ class Sequence {
 	 * @typedef {Error} LockedError
 	 * */
 
-	/* c8 ignore next 16 */
-	/**
-	 * Prevent key chain mutations from locked instances.
-	 *
-	 * @param {String} fn - calling method name.
-	 *
-	 * @throws {LockedError} - calling method not allowed in locked mode.
-	 * */
-	lock = fn => {
-		if (this.#lock) {
-			throw {
-				name: 'LockedError',
-				message: `Sequence.${fn} is forbidden on locked instance. This indicate an unsafe construction in your code ` +
-					'where you are trying to mutate a sequence list from a copy instance.'
-			}
-		}
-	};
-
 	/**
 	 * Destroy current instance in a defined duration. This timer may be reset by another call to itself.
 	 *
@@ -164,12 +126,12 @@ class Sequence {
 	 * @throws {LockedError}
 	 * */
 	time = (duration, propagate) => {
-		this.lock('time');
+		this.guard('time');
 		this.untime();
 		this.#timer = setTimeout(this.destruct, duration);
 
 		// Double check the previous element is set to avoid null reference errors.
-		if (propagate === true && this.#previous != null) this.#previous.time(duration, true);
+		if (propagate === true && this.previous() != null) this.previous().time(duration, true);
 	};
 
 	/**
@@ -185,8 +147,8 @@ class Sequence {
 	 * @throws {LockedError}
 	 * */
 	destruct = () => {
-		this.lock('destruct');
-		this.#next.clear();
+		this.guard('destruct');
+		this.next().clear();
 	};
 
 	/**
@@ -195,65 +157,16 @@ class Sequence {
 	 * @throws {LockedError}
 	 * */
 	clear = () => {
-		this.lock('clear');
-		this.#previous = null;
+		this.guard('clear');
+		this.rebaseLeft(null);
 	};
-
-	/**
-	 * Re-assign previous sequence.
-	 *
-	 * @param {keys.Sequence} sequence
-	 * @return {keys.Sequence} sequence
-	 * */
-	rebaseLeft = sequence => {
-		this.#previous = sequence;
-		return sequence;
-	};
-
-	/**
-	 * Re-assign next sequence.
-	 *
-	 * @param {keys.Sequence} sequence
-	 * @return {keys.Sequence} sequence
-	 * */
-	rebaseRight = sequence => {
-		this.#next = sequence;
-		return sequence;
-	};
-
-	/**
-	 * Removes current sequence for chain. Same as {@link keys.Sequence.clear} with the extra handle of healing the chain
-	 * if not cut at edges.
-	 *
-	 * @throws {LockedError}
-	 * */
-	cut = () => {
-		this.lock('cut');
-
-		this.#previous && this.#previous.rebaseRight(this.#next);
-		this.#next.rebaseLeft(this.#previous);
-	};
-
-	/**
-	 * Returns the previous instance if any.
-	 *
-	 * @return {keys.Sequence | null} previousSequence
-	 * */
-	previous = () => this.#previous;
-
-	/**
-	 * Returns the next instance if any.
-	 *
-	 * @return {keys.Sequence | null} nextSequence
-	 * */
-	next = () => this.#next;
 
 	/**
 	 * Creates a locked copy of the current sequence.
 	 *
 	 * @return {keys.Sequence} sequence
 	 * */
-	copy = () => new Sequence(this.#key, this.#previous, this.#next, true);
+	copy = () => new Sequence(this.#key, this.previous(), this.next(), true);
 
 	/**
 	 * Returns current sequence keycode
@@ -273,7 +186,7 @@ class Sequence {
 		const output = current || [];
 		output.push(this.#key);
 
-		return this.#previous != null ? this.#previous.keyChain(output) : output;
+		return this.previous() != null ? this.previous().keyChain(output) : output;
 	};
 
 	/**
@@ -286,8 +199,8 @@ class Sequence {
 			this.cut();
 		}
 
-		if (this.#previous) {
-			this.#previous.cutTarget(target);
+		if (this.previous()) {
+			this.previous().cutTarget(target);
 		}
 	};
 }
