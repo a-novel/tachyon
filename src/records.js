@@ -218,7 +218,7 @@ class Record extends ChainList {
 		caretHandler && caretHandler.set(this.#caret.start, this.#caret.end);
 
 		if (count > 1 && this.previous()) {
-			return this.previous().undo(restored, {count: count - 1, self}, caretHandler);
+			return this.previous().undo(restored, {count: count - 1}, caretHandler);
 		} else {
 			return restored;
 		}
@@ -335,7 +335,7 @@ class RecordsManager {
 		this.#maxLength = maxLength;
 		this.#packOptions = pack;
 
-		this.#caretHandler = new CaretHandler(0, 0);
+		this.caretHandler = new CaretHandler(0, 0);
 
 		if (history == null || history.length === 0) {
 			return;
@@ -374,7 +374,7 @@ class RecordsManager {
 	/**
 	 * @type CaretHandler
 	 * */
-	#caretHandler;
+	caretHandler;
 
 	/**
 	 * Push a new record to the stack and update content.
@@ -392,7 +392,7 @@ class RecordsManager {
 			newContent: record.newContent,
 			caret: record.caret,
 			timestamp: new Date().getTime()
-		}, this.#caretHandler);
+		}, this.caretHandler);
 
 		const append = this.#record != null && (this.#packOptions ? this.#record.appendPack : this.#record.append);
 
@@ -432,7 +432,7 @@ class RecordsManager {
 	 * @return {String} alteredContent
 	 * */
 	undo = options => {
-		if (this.#record) this.#content = this.#record.undo(this.#content, options, this.#caretHandler);
+		if (this.#record) this.#content = this.#record.undo(this.#content, options, this.caretHandler);
 		return this.#content;
 	};
 
@@ -444,7 +444,7 @@ class RecordsManager {
 	 * @return {String} alteredContent
 	 * */
 	redo = options => {
-		if (this.#record) this.#content = this.#record.redo(this.#content, options, this.#caretHandler);
+		if (this.#record) this.#content = this.#record.redo(this.#content, options, this.caretHandler);
 		return this.#content;
 	};
 
@@ -461,10 +461,6 @@ class RecordsManager {
 	 * @return {String} content.
 	 * */
 	content = () => this.#content;
-
-	setCaret = this.#caretHandler.set
-
-	getCaret = this.#caretHandler.current;
 }
 
 export default RecordsManager;
