@@ -4,6 +4,7 @@
  * */
 
 import ChainList from './chainList';
+import CaretHandler from './caret';
 
 /**
  * @typedef {{
@@ -42,10 +43,11 @@ class Record extends ChainList {
 	 *   [lock]: Boolean,
 	 *   [timestamp]: Number
 	 * }} options
+	 * @param {CaretHandler} [caretHandler]
 	 *
 	 * @return records.Record
 	 * */
-	constructor(options) {
+	constructor(options, caretHandler) {
 		const {caret, oldContent, newContent, canceled, previous, next, lock, timestamp} = options;
 
 		super(previous, next, lock);
@@ -54,6 +56,8 @@ class Record extends ChainList {
 		this.#newContent = newContent;
 		this.#canceled = canceled;
 		this.#timestamp = timestamp;
+
+		caretHandler && caretHandler.update({newContentLength: newContent.length, oldContentLength: oldContent.length});
 	}
 
 	/**
@@ -190,15 +194,16 @@ class Record extends ChainList {
 	 *
 	 * @param {String} content
 	 * @param {HistoryOption} [options]
+	 * @param {CaretHandler} [caretHandler]
 	 *
 	 * @return {String} alteredContent
 	 * */
-	undo = (content, options) => {
+	undo = (content, options, caretHandler) => {
 		const {count} = options || {};
 
 		if (this.#canceled) {
 			if (this.previous()) {
-				return this.previous().undo(content, options);
+				return this.previous().undo(content, options, caretHandler);
 			} else {
 				return content;
 			}
@@ -210,8 +215,10 @@ class Record extends ChainList {
 			this.#oldContent +
 			content.slice(this.#caret.start + this.#newContent.length);
 
+		caretHandler && caretHandler.set(this.#caret.start, this.#caret.end);
+
 		if (count > 1 && this.previous()) {
-			return this.previous().undo(restored, {count: count - 1});
+			return this.previous().undo(restored, {count: count - 1, self}, caretHandler);
 		} else {
 			return restored;
 		}
@@ -222,16 +229,17 @@ class Record extends ChainList {
 	 *
 	 * @param {String} content
 	 * @param {HistoryOption} [options]
+	 * @param {CaretHandler} [caretHandler]
 	 *
 	 * @return {String} alteredContent
 	 * */
-	redo = (content, options) => {
+	redo = (content, options, caretHandler) => {
 		const {count} = options || {};
 
 		if (!this.isCanceled()) return content;
 
 		if (this.previous() && this.previous().isCanceled()) {
-			return this.previous().redo(content, options);
+			return this.previous().redo(content, options, caretHandler);
 		}
 
 		this.#canceled = false;
@@ -240,8 +248,11 @@ class Record extends ChainList {
 			this.#newContent +
 			content.slice(this.#caret.end);
 
+		const caretPos = this.#caret.start + this.#newContent.length;
+		caretHandler && caretHandler.set(caretPos, caretPos);
+
 		if (count > 1 && this.next()) {
-			return this.next().redo(restored, {count: count - 1});
+			return this.next().redo(restored, {count: count - 1}, caretHandler);
 		} else {
 			return restored;
 		}
@@ -252,7 +263,7 @@ class Record extends ChainList {
 	 *
 	 * @param {Number} count
 	 * */
-	clear = count => {
+	clear = async count => {
 		if (count > 1) {
 			this.previous() && this.previous().clear(count - 1);
 		} else {
@@ -324,6 +335,8 @@ class RecordsManager {
 		this.#maxLength = maxLength;
 		this.#packOptions = pack;
 
+		this.#caretHandler = new CaretHandler(0, 0);
+
 		if (history == null || history.length === 0) {
 			return;
 		}
@@ -359,6 +372,11 @@ class RecordsManager {
 	#packOptions;
 
 	/**
+	 * @type CaretHandler
+	 * */
+	#caretHandler;
+
+	/**
 	 * Push a new record to the stack and update content.
 	 *
 	 * @param {{
@@ -374,7 +392,7 @@ class RecordsManager {
 			newContent: record.newContent,
 			caret: record.caret,
 			timestamp: new Date().getTime()
-		});
+		}, this.#caretHandler);
 
 		const append = this.#record != null && (this.#packOptions ? this.#record.appendPack : this.#record.append);
 
@@ -414,7 +432,7 @@ class RecordsManager {
 	 * @return {String} alteredContent
 	 * */
 	undo = options => {
-		if (this.#record) this.#content = this.#record.undo(this.#content, options);
+		if (this.#record) this.#content = this.#record.undo(this.#content, options, this.#caretHandler);
 		return this.#content;
 	};
 
@@ -426,7 +444,7 @@ class RecordsManager {
 	 * @return {String} alteredContent
 	 * */
 	redo = options => {
-		if (this.#record) this.#content = this.#record.redo(this.#content, options);
+		if (this.#record) this.#content = this.#record.redo(this.#content, options, this.#caretHandler);
 		return this.#content;
 	};
 
@@ -443,6 +461,10 @@ class RecordsManager {
 	 * @return {String} content.
 	 * */
 	content = () => this.#content;
+
+	setCaret = this.#caretHandler.set
+
+	getCaret = this.#caretHandler.current;
 }
 
 export default RecordsManager;

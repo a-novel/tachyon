@@ -1,6 +1,6 @@
 {
   "name": "@anovel/tachyon",
-  "version": "0.8.2",
+  "version": "0.8.3-beta",
   "private": false,
   "scripts": {
     "build:test": "NODE_ENV=test rollup -c && NODE_ENV=",
