@@ -413,7 +413,7 @@ manager.push({newContent: 'l', caret: {start: 2, end: 2}});
 manager.push({newContent: 'l', caret: {start: 3, end: 3}});
 manager.push({newContent: 'o', caret: {start: 4, end: 4}});
 
-// wait 2s.
+// wait 1s.
 await new Promise(resolve => setTimeout(resolve, 1000));
 
 manager.push({newContent: ' ', caret: {start: 5, end: 5}});
