@@ -24,7 +24,7 @@
  *
  * @param {Range} range - current document range
  * @param {Node} container - the container wrapping the selection
- * @param {number} offset - the targeted position for the caret
+ * @param {number} offset - the targeted caret position
  * @param {string[]=} ignore - ignore elements that match selectors in caret position count
  * @returns {number}
  */
@@ -32,26 +32,25 @@ const getComplexOffset = (range, container, offset, ignore) => {
 	// Select content from 0 to offset. This allow us to count every static content occurring before our caret position,
 	// which are likely to alter it.
 	range.setEnd(container, offset);
+
+	// Work on a virtual copy of current DOM.
 	const copy = range.cloneContents();
 
-	if (ignore && ignore.length) {
-		for (const selector of ignore) {
-			copy.querySelectorAll(selector).forEach(e => {
-				if (e == null || e.innerHTML == null || e.innerHTML === '') {
-					return;
-				}
+	if (ignore == null || ignore.length === 0) return copy.textContent.length;
 
-				e.innerHTML = '';
-			});
-		}
+	// Remove inner content of ignored nodes.
+	for (const selector of ignore) {
+		copy.querySelectorAll(selector).forEach(e => {
+			if (e == null || e.innerHTML == null || e.innerHTML === '') {
+				return;
+			}
+
+			e.innerHTML = '';
+		});
 	}
 
-	// Remove static length from caret position.
-	return [...copy.childNodes].reduce((acc, e) => {
-		if (e == null) return acc;
-		else if (e.TEXT_NODE) return acc + e.textContent.length;
-		else return acc + e.innerText.length;
-	}, 0);
+	// Calculate the new selection length to deduce the caret offset.
+	return copy.textContent.length;
 };
 
 /**
@@ -103,7 +102,7 @@ const seekSelectionNode = (target, el, ignore) => {
 	}
 
 	// Since we should return if a Node was found, it means our caret is currently out of bounds. We set the caret at the
-	// very end then.
+	// very end in this case.
 	let last = nodes.pop();
 	while (last && last.nodeType !== Node.TEXT_NODE && last.childNodes && last.childNodes.length) {
 		last = [...last.childNodes].pop();
@@ -191,18 +190,21 @@ const setSelectionRange = (element, start, end, ignore) => {
 	// example. It is more generally safer to avoid relying too much on globals.
 	const win = (element.ownerDocument || document).defaultView;
 	const sel = win.getSelection();
+	const range = (element.ownerDocument || document).createRange();
 
 	// No need to do anything if no content is present.
 	if (element.innerText == null || element.innerText.length === 0) {
+		range.setStart(element, 0);
+		range.setEnd(element, 0);
 		sel.removeAllRanges();
+		sel.addRange(range);
+
 		return {start: 0, end: 0};
 	}
 
 	// Cap caret position to avoid overflow error.
 	start = Math.min(element.innerText.length, start);
 	end = Math.min(element.innerText.length, end || start);
-
-	const range = (element.ownerDocument || document).createRange();
 
 	// Get relative position of the node.
 	const {container: startNode, offset: startOffset} = seekSelectionNode(start, element, ignore);

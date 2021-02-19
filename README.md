@@ -178,21 +178,21 @@ import css from 'myStyle.module.css';
 
 // Example with a copy/paste mock implementation.
 const MyComponent = () => {
-	const sequencer = new Sequencer();
-	
-	const combos = [
-      {trigger: literals.COMBOS.COPY, action: () => console.log('I am copied!')},
-      {trigger: literals.COMBOS.PASTE, action: () => console.log('I am paste!')}
-    ];
-	
-	return (
-		<div className={css.container}>
-          <div
-            onKeyDown={sequencer.update({combos})}
-            onKeyUp={sequencer.remove}
-          >Copy me (CTRL + C) or Paste me (CTRL + V)</div>
-        </div>
-    );
+  const sequencer = new Sequencer();
+  
+  const combos = [
+    {trigger: literals.COMBOS.COPY, action: () => console.log('I am copied!')},
+    {trigger: literals.COMBOS.PASTE, action: () => console.log('I am paste!')}
+  ];
+  
+  return (
+    <div className={css.container}>
+      <div
+        onKeyDown={sequencer.update({combos})}
+        onKeyUp={sequencer.remove}
+      >Copy me (CTRL + C) or Paste me (CTRL + V)</div>
+    </div>
+  );
 };
 ```
 
@@ -212,7 +212,7 @@ Update sequence and return the updated list of pressed keys in the sequence. Ret
 
 ```jsx
 function handler(e) {
-	const keys = sequencer.update(options)(e);
+  const keys = sequencer.update(options)(e);
 }
 ```
 
@@ -246,7 +246,7 @@ keys array.
 
 ```jsx
 function handler(e) {
-	const keys = sequencer.remove(e);
+  const keys = sequencer.remove(e);
 }
 ```
 

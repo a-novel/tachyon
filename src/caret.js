@@ -44,7 +44,7 @@ class CaretHandler {
 
 		// Current is rangeOrigin.
 		if (!rangeOrigin) {
-			this.#start += offset;
+			this.#start += newContentLength;
 			this.#end = this.#start;
 
 			return;
