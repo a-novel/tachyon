@@ -136,8 +136,6 @@ const getSelectionRange = (element, ignore) => {
 	// Check if something is selected (pointless otherwise).
 	const sel = win.getSelection();
 	if (sel.rangeCount > 0) {
-		// TODO : would be useful to look further at how selection work; can a document hold multiple selection ranges ?
-		// TODO : How do we deal with them ?
 		const range = win.getSelection().getRangeAt(0);
 
 		// Default variable provided by js DOM.
@@ -190,15 +188,10 @@ const setSelectionRange = (element, start, end, ignore) => {
 	// example. It is more generally safer to avoid relying too much on globals.
 	const win = (element.ownerDocument || document).defaultView;
 	const sel = win.getSelection();
-	const range = (element.ownerDocument || document).createRange();
 
 	// No need to do anything if no content is present.
 	if (element.innerText == null || element.innerText.length === 0) {
-		range.setStart(element, 0);
-		range.setEnd(element, 0);
-		sel.removeAllRanges();
-		sel.addRange(range);
-
+		sel.setBaseAndExtent(element, 0, element, 0);
 		return {start: 0, end: 0};
 	}
 
@@ -210,12 +203,7 @@ const setSelectionRange = (element, start, end, ignore) => {
 	const {container: startNode, offset: startOffset} = seekSelectionNode(start, element, ignore);
 	const {container: endNode, offset: endOffset} = seekSelectionNode(end, element, ignore);
 
-	range.setStart(startNode || element, startOffset);
-	range.setEnd(endNode || element, endOffset);
-
-	sel.removeAllRanges();
-	sel.addRange(range);
-
+	sel.setBaseAndExtent(startNode || element, startOffset, endNode || element, endOffset);
 	return {start, end};
 };
 
