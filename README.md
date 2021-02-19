@@ -3,7 +3,7 @@
 Helpers to be used within a frontend framework.
 
 ```
-yarn add @anovel/tachyon@0.8.2
+yarn add @anovel/tachyon
 ```
 
 <div align="center">
