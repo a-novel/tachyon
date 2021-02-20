@@ -9,7 +9,7 @@ import {FormatError} from './errors';
  *
  * @const {regexp}
  * */
-const urlRegexp = /^\/[a-zA-Z0-9():]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/;
+const urlRegexp = /^\/[a-zA-Z0-9():]+([-a-zA-Z0-9()@:%_+.~#?&/=]*)/;
 
 /**
  * Interpolate a pattern url with actual values for parameters.
