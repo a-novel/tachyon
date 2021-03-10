@@ -2,7 +2,7 @@ import Sequencer, {COMBOS} from './keys';
 import RecordsManager from './records';
 import {getOS, OS} from './os';
 import {getRange, setRange} from './selection';
-import {goTo, isActive, buildQueryString, buildUrl, fillParams} from './url';
+import {goTo, isActive, buildQueryString, buildUrl, fillParams, buildAbsoluteUrl} from './url';
 
 const literals = {OS, COMBOS};
 
@@ -17,5 +17,6 @@ export {
 	isActive,
 	buildQueryString,
 	buildUrl,
-	fillParams
+	fillParams,
+	buildAbsoluteUrl
 };

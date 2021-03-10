@@ -97,7 +97,7 @@ const buildQueryString = query => {
 		throw new TypeError(`non valid constructor ${query.constructor.name} for query: should be an object`);
 	}
 
-	return Object.entries(query).map(([key, value]) => `${key}=${value}`).join('&');
+	return Object.entries(query).map(([key, value]) => `${key}=${value.replaceAll('/', '%2F')}`).join('&');
 };
 
 /**
@@ -147,6 +147,11 @@ const buildUrl = (url, options) => {
 	if (query) url += `?${buildQueryString(query)}`;
 
 	return url;
+};
+
+const buildAbsoluteUrl = (url, options) => {
+	const [protocol, pathname] = url.split(':/');
+	return `${protocol}:/${buildUrl(pathname, options)}`;
 };
 
 /**
@@ -243,4 +248,4 @@ const isActive = (target, currentLocation, exact) => {
 	return true;
 };
 
-export {goTo, fillParams, buildUrl, isActive, buildQueryString};
+export {goTo, fillParams, buildUrl, isActive, buildQueryString, buildAbsoluteUrl};
