@@ -97,7 +97,9 @@ const buildQueryString = query => {
 		throw new TypeError(`non valid constructor ${query.constructor.name} for query: should be an object`);
 	}
 
-	return Object.entries(query).map(([key, value]) => `${key}=${value.replaceAll('/', '%2F')}`).join('&');
+	return Object.entries(query).filter(x => x[1] != null && x[1] !== '').map(
+		([key, value]) => `${key}=${`${value}`.replaceAll('/', '%2F')}`
+	).join('&');
 };
 
 /**
